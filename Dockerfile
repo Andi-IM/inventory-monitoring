@@ -1,6 +1,6 @@
 # Stage 1: Build frontend assets
 FROM node:22-alpine AS node-builder
-RUN apk add --no-cache php php-cli php-common php-mbstring php-xml php-dom php-tokenizer php-curl php-openssl php-json curl git unzip
+RUN apk add --no-cache php php-cli php-common php-mbstring php-xml php-dom php-tokenizer php-curl php-openssl php-json php-phar curl git unzip
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 WORKDIR /app
 COPY composer.json composer.lock ./
