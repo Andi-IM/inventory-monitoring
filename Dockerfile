@@ -1,5 +1,6 @@
 # Stage 1: Build frontend assets
 FROM node:22-alpine AS node-builder
+RUN apk add --no-cache php php-cli php-common php-mbstring php-xml php-dom php-tokenizer php-curl php-openssl php-json
 WORKDIR /app
 COPY package*.json ./
 RUN npm ci
