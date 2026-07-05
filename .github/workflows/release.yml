@@ -2,8 +2,8 @@ name: Release CI
 
 on:
   push:
-    tags:
-      - 'v0.*'
+    branches:
+      - main
 
 permissions:
   contents: write
@@ -16,6 +16,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          fetch-depth: 0
 
       - name: Setup PHP
         uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # v2
@@ -50,9 +52,20 @@ jobs:
       - name: Run All Tests
         run: php artisan test
 
+      - name: Bump version and push tag
+        id: tag_version
+        uses: anothrNick/github-tag-action@8c247188b2b453a06857367fb3521d3394a3b4ae # v1.64.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          WITH_V: true
+          INITIAL_VERSION: 0.1.0
+          DEFAULT_BUMP: patch
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@c062e08bd532815e2082a85e87e3ef29c3e6d191 # v2.0.5
         with:
+          tag_name: ${{ steps.tag_version.outputs.new_tag }}
+          name: Release ${{ steps.tag_version.outputs.new_tag }}
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
