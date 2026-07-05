@@ -57,7 +57,7 @@ RUN echo 'server { \
 }' > /etc/nginx/http.d/default.conf
 
 # Configure Supervisor
-RUN echo '[supervisord] \
+RUN mkdir -p /etc/supervisor/conf.d && echo '[supervisord] \
 nodaemon=true \
 user=root \
 logfile=/var/log/supervisord.log \
