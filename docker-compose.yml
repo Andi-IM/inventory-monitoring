@@ -14,14 +14,14 @@ services:
     environment:
       APP_ENV: local
       APP_DEBUG: 'true'
-      APP_KEY: base64:v1Zk4xNlhPWFZpTUtSU3RjMmUzaWlhM2RhNnFlcTc= # Generated default key
+      APP_KEY: ${APP_KEY:-}
       APP_URL: http://localhost:8000
       DB_CONNECTION: pgsql
       DB_HOST: db
       DB_PORT: 5432
       DB_DATABASE: inventory_monitoring
       DB_USERNAME: laravel
-      DB_PASSWORD: secret_password
+      DB_PASSWORD: ${DB_PASSWORD:-secret}
       CACHE_STORE: database
       SESSION_DRIVER: database
       QUEUE_CONNECTION: database
@@ -36,7 +36,7 @@ services:
     environment:
       POSTGRES_DB: inventory_monitoring
       POSTGRES_USER: laravel
-      POSTGRES_PASSWORD: secret_password
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-secret}
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:

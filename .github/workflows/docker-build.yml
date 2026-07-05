@@ -65,6 +65,9 @@ jobs:
           cache-to: type=gha,mode=max
 
       - name: Run Docker Compose services
+        env:
+          APP_KEY: ${{ secrets.CI_APP_KEY }}
+          DB_PASSWORD: ${{ secrets.CI_DB_PASSWORD }}
         run: |
           docker compose up -d
 
