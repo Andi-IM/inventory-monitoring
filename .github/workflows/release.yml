@@ -54,7 +54,7 @@ jobs:
 
       - name: Calculate next tag
         id: dry_tag
-        uses: anothrNick/github-tag-action@8c247188b2b453a06857367fb3521d3394a3b4ae # v1.64.0
+        uses: anothrNick/github-tag-action@v1
         with:
           dry_run: true
           WITH_V: true
@@ -120,7 +120,7 @@ jobs:
 
       - name: Bump version and push tag
         id: tag_version
-        uses: anothrNick/github-tag-action@8c247188b2b453a06857367fb3521d3394a3b4ae # v1.64.0
+        uses: anothrNick/github-tag-action@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           WITH_V: true
