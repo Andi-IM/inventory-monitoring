@@ -1,0 +1,14 @@
+.git
+.github
+.agents
+AGENTS.md
+node_modules
+vendor
+public/build
+storage/*.key
+.env
+.env.*
+.phpunit.cache
+bootstrap/ssr
+docker-compose.yml
+Dockerfile
