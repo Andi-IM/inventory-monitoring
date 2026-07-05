@@ -34,76 +34,79 @@ RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
 
 # Configure Nginx
 RUN mkdir -p /run/nginx
-RUN echo 'server { \
-    listen 80; \
-    server_name localhost; \
-    root /var/www/html/public; \
-    index index.php; \
-    charset utf-8; \
-    location / { \
-        try_files $uri $uri/ /index.php?$query_string; \
-    } \
-    location = /favicon.ico { access_log off; log_not_found off; } \
-    location = /robots.txt  { access_log off; log_not_found off; } \
-    error_page 404 /index.php; \
-    location ~ \.php$ { \
-        fastcgi_pass 127.0.0.1:9000; \
-        fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name; \
-        include fastcgi_params; \
-    } \
-    location ~ /\.(?!well-known).* { \
-        deny all; \
-    } \
-}' > /etc/nginx/http.d/default.conf
+RUN printf '%s\n' \
+    'server {' \
+    '    listen 80;' \
+    '    server_name localhost;' \
+    '    root /var/www/html/public;' \
+    '    index index.php;' \
+    '    charset utf-8;' \
+    '    location / {' \
+    '        try_files $uri $uri/ /index.php?$query_string;' \
+    '    }' \
+    '    location = /favicon.ico { access_log off; log_not_found off; }' \
+    '    location = /robots.txt  { access_log off; log_not_found off; }' \
+    '    error_page 404 /index.php;' \
+    '    location ~ \.php$ {' \
+    '        fastcgi_pass 127.0.0.1:9000;' \
+    '        fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;' \
+    '        include fastcgi_params;' \
+    '    }' \
+    '    location ~ /\.(?!well-known).* {' \
+    '        deny all;' \
+    '    }' \
+    '}' > /etc/nginx/http.d/default.conf
 
 # Configure Supervisor
-RUN mkdir -p /etc/supervisor/conf.d && echo '[supervisord] \
-nodaemon=true \
-user=root \
-logfile=/var/log/supervisord.log \
-pidfile=/var/run/supervisord.pid \
-\
-[program:php-fpm] \
-command=php-fpm \
-stdout_logfile=/dev/stdout \
-stdout_logfile_maxbytes=0 \
-stderr_logfile=/dev/stderr \
-stderr_logfile_maxbytes=0 \
-autorestart=true \
-\
-[program:nginx] \
-command=nginx -g "daemon off;" \
-stdout_logfile=/dev/stdout \
-stdout_logfile_maxbytes=0 \
-stderr_logfile=/dev/stderr \
-stderr_logfile_maxbytes=0 \
-autorestart=true \
-' > /etc/supervisor/conf.d/supervisord.conf
+RUN mkdir -p /etc/supervisor/conf.d && printf '%s\n' \
+    '[supervisord]' \
+    'nodaemon=true' \
+    'user=root' \
+    'logfile=/var/log/supervisord.log' \
+    'pidfile=/var/run/supervisord.pid' \
+    '' \
+    '[program:php-fpm]' \
+    'command=php-fpm' \
+    'stdout_logfile=/dev/stdout' \
+    'stdout_logfile_maxbytes=0' \
+    'stderr_logfile=/dev/stderr' \
+    'stderr_logfile_maxbytes=0' \
+    'autorestart=true' \
+    '' \
+    '[program:nginx]' \
+    'command=nginx -g "daemon off;"' \
+    'stdout_logfile=/dev/stdout' \
+    'stdout_logfile_maxbytes=0' \
+    'stderr_logfile=/dev/stderr' \
+    'stderr_logfile_maxbytes=0' \
+    'autorestart=true' \
+    > /etc/supervisor/conf.d/supervisord.conf
 
 # Configure Startup Script
-RUN echo '#!/bin/bash \
-if [ "${DB_CONNECTION}" = "sqlite" ] && [ ! -f "${DB_DATABASE:-database/database.sqlite}" ]; then \
-    mkdir -p $(dirname "${DB_DATABASE:-database/database.sqlite}") \
-    touch "${DB_DATABASE:-database/database.sqlite}" \
-fi \
-\
-# Wait for PostgreSQL if DB_CONNECTION is pgsql \
-if [ "${DB_CONNECTION}" = "pgsql" ]; then \
-    echo "Waiting for PostgreSQL database..." \
-    until pg_isready -h "$DB_HOST" -p "${DB_PORT:-5432}" -U "$DB_USERNAME"; do \
-        sleep 1 \
-    done \
-    echo "PostgreSQL is ready." \
-fi \
-\
-php artisan migrate --force \
-php artisan config:cache \
-php artisan route:cache \
-php artisan view:cache \
-\
-exec supervisord -c /etc/supervisor/conf.d/supervisord.conf \
-' > /usr/local/bin/start.sh \
-&& chmod +x /usr/local/bin/start.sh
+RUN printf '%s\n' \
+    '#!/bin/bash' \
+    'if [ "${DB_CONNECTION}" = "sqlite" ] && [ ! -f "${DB_DATABASE:-database/database.sqlite}" ]; then' \
+    '    mkdir -p $(dirname "${DB_DATABASE:-database/database.sqlite}")' \
+    '    touch "${DB_DATABASE:-database/database.sqlite}"' \
+    'fi' \
+    '' \
+    '# Wait for PostgreSQL if DB_CONNECTION is pgsql' \
+    'if [ "${DB_CONNECTION}" = "pgsql" ]; then' \
+    '    echo "Waiting for PostgreSQL database..."' \
+    '    until pg_isready -h "$DB_HOST" -p "${DB_PORT:-5432}" -U "$DB_USERNAME"; do' \
+    '        sleep 1' \
+    '    done' \
+    '    echo "PostgreSQL is ready."' \
+    'fi' \
+    '' \
+    'php artisan migrate --force' \
+    'php artisan config:cache' \
+    'php artisan route:cache' \
+    'php artisan view:cache' \
+    '' \
+    'exec supervisord -c /etc/supervisor/conf.d/supervisord.conf' \
+    > /usr/local/bin/start.sh \
+    && chmod +x /usr/local/bin/start.sh
 
 # Set working directory
 WORKDIR /var/www/html
