@@ -2,6 +2,7 @@ version: '3.8'
 
 services:
   web:
+    image: inventory-monitoring-web:latest
     build:
       context: .
       dockerfile: Dockerfile

@@ -20,6 +20,7 @@ RUN apk add --no-cache \
     supervisor \
     bash \
     postgresql-dev \
+    postgresql-client \
     sqlite-dev \
     libzip-dev \
     libpng-dev \
