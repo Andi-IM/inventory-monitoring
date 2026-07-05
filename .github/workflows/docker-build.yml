@@ -1,0 +1,103 @@
+name: Docker Build & Smoke Test CI
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'Dockerfile'
+      - 'docker-compose.yml'
+      - '.dockerignore'
+      - '.github/workflows/docker-build.yml'
+      - 'app/**'
+      - 'bootstrap/**'
+      - 'config/**'
+      - 'database/**'
+      - 'resources/**'
+      - 'routes/**'
+      - 'composer.json'
+      - 'package.json'
+      - 'vite.config.ts'
+      - 'vite-module-loader.js'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'Dockerfile'
+      - 'docker-compose.yml'
+      - '.dockerignore'
+      - '.github/workflows/docker-build.yml'
+      - 'app/**'
+      - 'bootstrap/**'
+      - 'config/**'
+      - 'database/**'
+      - 'resources/**'
+      - 'routes/**'
+      - 'composer.json'
+      - 'package.json'
+      - 'vite.config.ts'
+      - 'vite-module-loader.js'
+
+permissions:
+  contents: read
+
+jobs:
+  docker-test:
+    name: Build & Smoke Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker Image
+        run: |
+          docker compose build
+
+      - name: Run Docker Compose services
+        run: |
+          docker compose up -d
+
+      - name: Wait for services to be ready
+        run: |
+          echo "Waiting for db service to be healthy..."
+          for i in {1..20}; do
+            STATUS=$(docker inspect --format='{{json .State.Health.Status}}' $(docker compose ps -q db))
+            if [ "$STATUS" = "\"healthy\"" ]; then
+              echo "DB is healthy!"
+              break
+            fi
+            echo "Current DB status: $STATUS. Waiting..."
+            sleep 2
+          done
+
+          echo "Waiting for web service to run migrations..."
+          sleep 5
+
+      - name: Run HTTP Smoke Test
+        id: smoke_test
+        run: |
+          RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8000 || echo "failed")
+          echo "Web service responded with HTTP status: $RESPONSE"
+          if [ "$RESPONSE" = "200" ] || [ "$RESPONSE" = "302" ]; then
+            echo "Smoke test passed successfully!"
+          else
+            echo "Smoke test failed with response: $RESPONSE"
+            exit 1
+          fi
+
+      - name: Print Container Logs on Failure
+        if: failure()
+        run: |
+          echo "=== Web Container Logs ==="
+          docker compose logs web
+          echo "=== DB Container Logs ==="
+          docker compose logs db
+
+      - name: Stop Docker Compose services
+        if: always()
+        run: |
+          docker compose down -v
