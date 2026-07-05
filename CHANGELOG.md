@@ -1,3 +1,10 @@
+# [0.5.0](https://github.com/Andi-IM/inventory-monitoring/compare/v0.4.0...v0.5.0) (2026-07-05)
+
+
+### Features
+
+* add CI pipeline for Docker builds and update compose configuration to support environment-injected secrets ([ae9a09f](https://github.com/Andi-IM/inventory-monitoring/commit/ae9a09f56c0829f91cf2ffd24acc421c0c97e2bc))
+
 # [0.4.0](https://github.com/Andi-IM/inventory-monitoring/compare/v0.3.0...v0.4.0) (2026-07-05)
 
 
