@@ -1,4 +1,4 @@
-name: tests
+name: Module Inventory CI
 
 on:
   push:
@@ -7,18 +7,51 @@ on:
       - main
       - master
       - workos
+    paths:
+      - 'Modules/Inventory/**'
+      - 'resources/js/pages/inventory/**'
+      - 'tests/Feature/InventoryCrudTest.php'
+      - '.github/workflows/module-inventory.yml'
+      - 'composer.json'
+      - 'composer.lock'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'vite.config.ts'
+      - 'vite-module-loader.js'
+      - 'app/**'
+      - 'config/**'
+      - 'database/**'
+      - 'bootstrap/**'
+      - 'routes/**'
   pull_request:
     branches:
       - develop
       - main
       - master
       - workos
+    paths:
+      - 'Modules/Inventory/**'
+      - 'resources/js/pages/inventory/**'
+      - 'tests/Feature/InventoryCrudTest.php'
+      - '.github/workflows/module-inventory.yml'
+      - 'composer.json'
+      - 'composer.lock'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'vite.config.ts'
+      - 'vite-module-loader.js'
+      - 'app/**'
+      - 'config/**'
+      - 'database/**'
+      - 'bootstrap/**'
+      - 'routes/**'
 
 permissions:
   contents: read
 
 jobs:
-  ci:
+  test:
+    name: Test PHP ${{ matrix.php-version }}
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -43,9 +76,9 @@ jobs:
           node-version: '22'
 
       - name: Install Node Dependencies
-        run: npm i
+        run: npm ci
 
-      - name: Install Dependencies
+      - name: Install PHP Dependencies
         run: composer install --no-interaction --prefer-dist --optimize-autoloader
 
       - name: Copy Environment File
@@ -60,5 +93,5 @@ jobs:
       - name: Run Type Analysis
         run: composer types:check
 
-      - name: Tests
+      - name: Run All Tests
         run: php artisan test
