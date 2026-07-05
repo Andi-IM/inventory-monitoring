@@ -1,3 +1,10 @@
+# [0.3.0](https://github.com/Andi-IM/inventory-monitoring/compare/v0.2.1...v0.3.0) (2026-07-05)
+
+
+### Features
+
+* add CI pipeline for Docker build and smoke testing with postgresql-client support ([48ef0e1](https://github.com/Andi-IM/inventory-monitoring/commit/48ef0e1f3e4821217686af06721a37c79444ef6e))
+
 ## [0.2.1](https://github.com/Andi-IM/inventory-monitoring/compare/v0.2.0...v0.2.1) (2026-07-05)
 
 
