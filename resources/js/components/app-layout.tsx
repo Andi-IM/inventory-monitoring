@@ -33,8 +33,12 @@ export function AppLayout({ title, children }: AppLayoutProps) {
                     <div className="mx-auto flex max-w-7xl flex-col gap-4 px-4 py-4 sm:px-6 lg:px-8">
                         <div className="flex items-center justify-between gap-4">
                             <div>
-                                <p className="text-sm text-zinc-500">Manajemen Inventaris</p>
-                                <h1 className="text-xl font-semibold">{title}</h1>
+                                <p className="text-sm text-zinc-500">
+                                    Manajemen Inventaris
+                                </p>
+                                <h1 className="text-xl font-semibold">
+                                    {title}
+                                </h1>
                             </div>
                             <Form {...logout.form()}>
                                 <button className="rounded-md border border-zinc-300 px-3 py-2 text-sm font-medium hover:bg-zinc-100 dark:border-zinc-700 dark:hover:bg-zinc-800">
@@ -55,7 +59,9 @@ export function AppLayout({ title, children }: AppLayoutProps) {
                         </nav>
                     </div>
                 </header>
-                <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">{children}</main>
+                <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+                    {children}
+                </main>
             </div>
         </>
     );

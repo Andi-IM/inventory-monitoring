@@ -1,9 +1,10 @@
-import { defineConfig } from 'vite';
+import { dirname } from 'path';
+import { fileURLToPath } from 'url';
 import laravel from 'laravel-vite-plugin';
-// Uncomment the import for your frontend framework:
-// import vue from '@vitejs/plugin-vue';
-// import react from '@vitejs/plugin-react';
-// import { svelte } from '@sveltejs/vite-plugin-svelte';
+import { defineConfig } from 'vite';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 export default defineConfig({
     build: {

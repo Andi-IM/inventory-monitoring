@@ -1,6 +1,9 @@
 import fs from 'fs/promises';
 import path from 'path';
-import { pathToFileURL } from 'url';
+import { pathToFileURL, fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 async function collectModuleAssetsPaths(paths, modulesPath) {
   modulesPath = path.join(__dirname, modulesPath);
@@ -36,7 +39,7 @@ async function collectModuleAssetsPaths(paths, modulesPath) {
           if (moduleConfig.paths && Array.isArray(moduleConfig.paths)) {
             paths.push(...moduleConfig.paths);
           }
-        } catch (error) {
+        } catch {
           // vite.config.js does not exist, skip this module
         }
       }
