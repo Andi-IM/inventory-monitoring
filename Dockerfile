@@ -1,10 +1,14 @@
 # Stage 1: Build frontend assets
 FROM node:22-alpine AS node-builder
-RUN apk add --no-cache php php-cli php-common php-mbstring php-xml php-dom php-tokenizer php-curl php-openssl php-json
+RUN apk add --no-cache php php-cli php-common php-mbstring php-xml php-dom php-tokenizer php-curl php-openssl php-json curl git unzip
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 WORKDIR /app
+COPY composer.json composer.lock ./
+RUN composer install --no-interaction --prefer-dist --no-dev --no-scripts --no-autoloader
 COPY package*.json ./
 RUN npm ci
 COPY . .
+RUN composer dump-autoload --no-dev --optimize
 RUN npm run build
 
 # Stage 2: Production PHP-FPM + Nginx environment
@@ -106,11 +110,8 @@ WORKDIR /var/www/html
 
 # Copy application files
 COPY --chown=www-data:www-data . .
+COPY --from=node-builder --chown=www-data:www-data /app/vendor ./vendor
 COPY --from=node-builder --chown=www-data:www-data /app/public/build ./public/build
-
-# Install Composer dependencies
-RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
-RUN composer install --no-interaction --prefer-dist --optimize-autoloader --no-dev
 
 # Fix permissions
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
