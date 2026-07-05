@@ -1,3 +1,10 @@
+# [0.4.0](https://github.com/Andi-IM/inventory-monitoring/compare/v0.3.0...v0.4.0) (2026-07-05)
+
+
+### Features
+
+* add CI workflow for Docker image building and smoke testing ([13fbbbc](https://github.com/Andi-IM/inventory-monitoring/commit/13fbbbc9d72eb7a0d384a32bcd6bca25778dfca8))
+
 # [0.3.0](https://github.com/Andi-IM/inventory-monitoring/compare/v0.2.1...v0.3.0) (2026-07-05)
 
 
