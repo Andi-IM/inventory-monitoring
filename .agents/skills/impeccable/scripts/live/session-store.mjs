@@ -12,31 +12,18 @@ export function createLiveSessionStore({ cwd = process.cwd(), sessionId } = {}) 
 
   function loadCachedOrRebuild(id) {
     const cached = snapshotCache.get(id);
-
-    if (cached) {
-return cached;
-}
-
+    if (cached) return cached;
     const journalPath = getReadableJournalPath(id);
     const rebuilt = rebuildSnapshotFromJournal(journalPath, id);
     snapshotCache.set(id, rebuilt);
-
     return rebuilt;
   }
 
   function getReadableJournalPath(id) {
     const primary = getJournalPath(rootDir, id);
-
-    if (fs.existsSync(primary)) {
-return primary;
-}
-
+    if (fs.existsSync(primary)) return primary;
     const legacy = getJournalPath(legacyRootDir, id);
-
-    if (fs.existsSync(legacy)) {
-return legacy;
-}
-
+    if (fs.existsSync(legacy)) return legacy;
     return primary;
   }
 
@@ -48,11 +35,9 @@ return legacy;
       const journalPath = getJournalPath(rootDir, normalized.id);
       const snapshotPath = getSnapshotPath(rootDir, normalized.id);
       const legacyJournalPath = getJournalPath(legacyRootDir, normalized.id);
-
       if (!fs.existsSync(journalPath) && fs.existsSync(legacyJournalPath)) {
         fs.copyFileSync(legacyJournalPath, journalPath);
       }
-
       const prior = loadCachedOrRebuild(normalized.id);
       const seq = prior.nextSeq;
       const entry = {
@@ -66,41 +51,26 @@ return legacy;
       const next = applyEvent(prior.snapshot, entry, prior.diagnostics);
       snapshotCache.set(normalized.id, { snapshot: next, diagnostics: next.diagnostics || [], nextSeq: seq + 1 });
       writeSnapshot(snapshotPath, next);
-
       return next;
     },
     getSnapshot(id = sessionId, opts = {}) {
-      if (!id) {
-throw new Error('session id required');
-}
-
+      if (!id) throw new Error('session id required');
       const journalPath = getReadableJournalPath(id);
       const snapshotPath = getSnapshotPath(rootDir, id);
       const rebuilt = rebuildSnapshotFromJournal(journalPath, id);
       snapshotCache.set(id, rebuilt);
       writeSnapshot(snapshotPath, rebuilt.snapshot);
-
-      if (!opts.includeCompleted && COMPLETED_PHASES.has(rebuilt.snapshot.phase)) {
-return null;
-}
-
+      if (!opts.includeCompleted && COMPLETED_PHASES.has(rebuilt.snapshot.phase)) return null;
       return rebuilt.snapshot;
     },
     listActiveSessions() {
       const ids = new Set();
-
       for (const dir of [legacyRootDir, rootDir]) {
-        if (!fs.existsSync(dir)) {
-continue;
-}
-
+        if (!fs.existsSync(dir)) continue;
         for (const name of fs.readdirSync(dir)) {
-          if (name.endsWith('.jsonl')) {
-ids.add(name.slice(0, -'.jsonl'.length));
-}
+          if (name.endsWith('.jsonl')) ids.add(name.slice(0, -'.jsonl'.length));
         }
       }
-
       return [...ids]
         .sort()
         .map((id) => this.getSnapshot(id))
@@ -110,20 +80,10 @@ ids.add(name.slice(0, -'.jsonl'.length));
 }
 
 function normalizeEvent(event, fallbackId) {
-  if (!event || typeof event !== 'object') {
-throw new Error('event object required');
-}
-
+  if (!event || typeof event !== 'object') throw new Error('event object required');
   const id = event.id || fallbackId;
-
-  if (!id || typeof id !== 'string') {
-throw new Error('event id required');
-}
-
-  if (!event.type || typeof event.type !== 'string') {
-throw new Error('event type required');
-}
-
+  if (!id || typeof id !== 'string') throw new Error('event id required');
+  if (!event.type || typeof event.type !== 'string') throw new Error('event type required');
   return { ...event, id };
 }
 
@@ -136,10 +96,7 @@ function getSnapshotPath(rootDir, id) {
 }
 
 function safeSessionId(id) {
-  if (!/^[A-Za-z0-9_-]{1,128}$/.test(id)) {
-throw new Error('invalid session id: ' + id);
-}
-
+  if (!/^[A-Za-z0-9_-]{1,128}$/.test(id)) throw new Error('invalid session id: ' + id);
   return id;
 }
 
@@ -172,31 +129,16 @@ function rebuildSnapshotFromJournal(journalPath, id) {
   let snapshot = baseSnapshot(id);
   const diagnostics = [];
   let nextSeq = 1;
-
-  if (!fs.existsSync(journalPath)) {
-return { snapshot, diagnostics, nextSeq };
-}
+  if (!fs.existsSync(journalPath)) return { snapshot, diagnostics, nextSeq };
 
   const lines = fs.readFileSync(journalPath, 'utf-8').split('\n');
-
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
-
-    if (!line.trim()) {
-continue;
-}
-
+    if (!line.trim()) continue;
     try {
       const entry = JSON.parse(line);
-
-      if (!entry || typeof entry !== 'object') {
-throw new Error('entry is not object');
-}
-
-      if (Number.isInteger(entry.seq)) {
-nextSeq = Math.max(nextSeq, entry.seq + 1);
-}
-
+      if (!entry || typeof entry !== 'object') throw new Error('entry is not object');
+      if (Number.isInteger(entry.seq)) nextSeq = Math.max(nextSeq, entry.seq + 1);
       snapshot = applyEvent(snapshot, entry);
     } catch (err) {
       diagnostics.push({
@@ -206,9 +148,7 @@ nextSeq = Math.max(nextSeq, entry.seq + 1);
       });
     }
   }
-
   snapshot.diagnostics = [...snapshot.diagnostics, ...diagnostics];
-
   return { snapshot, diagnostics, nextSeq };
 }
 
@@ -234,11 +174,7 @@ function applyEvent(snapshot, entry, inheritedDiagnostics = []) {
       next.expectedVariants = event.count ?? next.expectedVariants;
       next.pendingEventSeq = entry.seq ?? next.pendingEventSeq;
       next.pendingEvent = toPendingEvent(event);
-
-      if (event.screenshotPath) {
-upsertArtifact(next.annotationArtifacts, { type: 'screenshot', path: event.screenshotPath });
-}
-
+      if (event.screenshotPath) upsertArtifact(next.annotationArtifacts, { type: 'screenshot', path: event.screenshotPath });
       break;
     case 'variants_ready':
     case 'agent_done':
@@ -249,7 +185,6 @@ upsertArtifact(next.annotationArtifacts, { type: 'screenshot', path: event.scree
       next.arrivedVariants = event.arrivedVariants ?? (next.expectedVariants || next.arrivedVariants || 0);
       next.pendingEventSeq = null;
       next.pendingEvent = null;
-
       if (event.carbonize === true) {
         next.diagnostics.push({
           error: 'carbonize_cleanup_required',
@@ -257,14 +192,12 @@ upsertArtifact(next.annotationArtifacts, { type: 'screenshot', path: event.scree
           message: 'Accepted variant still has carbonize markers that must be folded into source CSS.',
         });
       }
-
       break;
     case 'checkpoint':
       if (COMPLETED_PHASES.has(next.phase)) {
         next.diagnostics.push({ error: 'checkpoint_after_terminal_ignored', phase: event.phase ?? null, revision: event.revision ?? null });
         break;
       }
-
       if ((event.revision ?? 0) >= (next.checkpointRevision ?? 0)) {
         next.phase = event.phase ?? next.phase;
         next.checkpointRevision = event.revision ?? next.checkpointRevision;
@@ -274,24 +207,16 @@ upsertArtifact(next.annotationArtifacts, { type: 'screenshot', path: event.scree
         next.sourceFile = event.sourceFile ?? next.sourceFile;
         next.previewFile = event.previewFile ?? next.previewFile;
         next.previewMode = event.previewMode ?? next.previewMode;
-
-        if (event.paramValues) {
-next.paramValues = { ...event.paramValues };
-}
+        if (event.paramValues) next.paramValues = { ...event.paramValues };
       } else {
         next.diagnostics.push({ error: 'stale_checkpoint_ignored', revision: event.revision });
       }
-
       break;
     case 'accept':
     case 'accept_intent':
       next.phase = 'accept_requested';
       next.visibleVariant = Number(event.variantId ?? next.visibleVariant);
-
-      if (event.paramValues) {
-next.paramValues = { ...event.paramValues };
-}
-
+      if (event.paramValues) next.paramValues = { ...event.paramValues };
       next.pendingEventSeq = entry.seq ?? next.pendingEventSeq;
       next.pendingEvent = toPendingEvent(event);
       break;
@@ -344,14 +269,12 @@ next.paramValues = { ...event.paramValues };
       next.diagnostics.push({ error: 'unknown_event_type', type: event.type });
       break;
   }
-
   return next;
 }
 
 function toPendingEvent(event) {
   const pending = { ...event };
   delete pending.token;
-
   return pending;
 }
 
