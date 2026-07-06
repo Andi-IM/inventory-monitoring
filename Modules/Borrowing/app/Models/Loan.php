@@ -4,13 +4,26 @@ namespace Modules\Borrowing\Models;
 
 use App\Models\User;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
 
 /**
+ * @property int $id
+ * @property string $code
+ * @property int|null $borrower_user_id
+ * @property int|null $external_borrower_id
+ * @property int $recorded_by_user_id
+ * @property Carbon|null $borrowed_at
  * @property Carbon $due_at
+ * @property Carbon|null $returned_at
+ * @property string $status
+ * @property string|null $notes
+ * @property-read User|null $borrowerUser
+ * @property-read User|null $recordedBy
+ * @property-read Collection<int, LoanItem> $loanItems
  */
 #[Fillable(['code', 'borrower_user_id', 'external_borrower_id', 'recorded_by_user_id', 'borrowed_at', 'due_at', 'returned_at', 'status', 'notes'])]
 class Loan extends Model
