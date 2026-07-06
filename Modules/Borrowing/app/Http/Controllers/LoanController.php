@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 use Modules\Access\Contracts\AccessClientInterface;
@@ -66,7 +67,11 @@ class LoanController extends Controller
             $unitIds = collect($request->itemUnitIds())->unique()->values()->toArray();
             $units = $inventoryClient->getAvailableItemUnitsByIds($unitIds);
 
-            abort_if($units->count() !== count($unitIds), 422, 'Sebagian unit sudah tidak tersedia.');
+            if ($units->count() !== count($unitIds)) {
+                throw ValidationException::withMessages([
+                    'item_unit_ids.0' => 'Sebagian unit sudah tidak tersedia.',
+                ]);
+            }
 
             $loan = Loan::query()->create([
                 'code' => 'LOAN-'.now()->format('Ymd').'-'.Str::upper(Str::random(6)),
