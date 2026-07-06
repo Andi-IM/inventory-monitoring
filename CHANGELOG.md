@@ -31,6 +31,25 @@
 
 * add CI pipeline for Docker build and smoke testing with postgresql-client support ([48ef0e1](https://github.com/Andi-IM/inventory-monitoring/commit/48ef0e1f3e4821217686af06721a37c79444ef6e))
 
+## [0.7.0](https://github.com/Andi-IM/inventory-monitoring/compare/v0.6.0...v0.7.0) (2026-07-06)
+
+
+### Features
+
+* **skills:** add semantic commit message workflow ([f3c8391](https://github.com/Andi-IM/inventory-monitoring/commit/f3c8391ecdde0f85ca703650b60e360853326e32))
+
+
+### Bug Fixes
+
+* **ci:** harden ghcr cleanup package retention ([6489eae](https://github.com/Andi-IM/inventory-monitoring/commit/6489eae376a2ac4f99c267ec06e1cea0f98b2149))
+* **ci:** pin ghcr cleanup action to sha ([e16b278](https://github.com/Andi-IM/inventory-monitoring/commit/e16b2784575e44a267ed4c92e40c027f9a7d8285))
+* **tailadmin:** improve Modal accessibility and fix DangerButton styling ([95a4023](https://github.com/Andi-IM/inventory-monitoring/commit/95a4023094524158fbc7b2ff6af428e27abd3a1e))
+* **tailadmin:** improve Modal accessibility and fix DangerButton styling ([83a39da](https://github.com/Andi-IM/inventory-monitoring/commit/83a39dafcb3e26acfba375ba6d27bf00c8e49784))
+* **tailadmin:** improve Modal focus trap accessibility ([2107cf5](https://github.com/Andi-IM/inventory-monitoring/commit/2107cf5362d680f66e79c1a649c65efcec0dc853))
+* **tailadmin:** improve Modal focus trap accessibility ([b205d5f](https://github.com/Andi-IM/inventory-monitoring/commit/b205d5f35c492b6cef15b4027ae6a2c9f21ec8be))
+* **tailadmin:** properly exclude disabled anchors in Modal focus trap ([9583c67](https://github.com/Andi-IM/inventory-monitoring/commit/9583c67a46b2645955f825981bc892729721729a))
+* **theme:** show sun icon in dark mode ([62659e6](https://github.com/Andi-IM/inventory-monitoring/commit/62659e67837a4e8734f33a24ec141816f3175cbd))
+
 ## [0.2.1](https://github.com/Andi-IM/inventory-monitoring/compare/v0.2.0...v0.2.1) (2026-07-05)
 
 
