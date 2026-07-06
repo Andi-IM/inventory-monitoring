@@ -10,3 +10,4 @@ This directory contains the Architecture Decision Records (ADRs) for the **inven
 | [0002](0002-adopt-per-module-ci-cd-pipelines.md) | Adopt Per-Module CI/CD Pipelines | Accepted | 2026-07-05 |
 | [0003](0003-automate-versioning-and-changelog.md) | Automate Versioning and CHANGELOG Generation | Accepted | 2026-07-05 |
 | [0004](0004-deploy-via-single-container-monolithic-docker.md) | Deploy via Single Container Monolithic Docker | Accepted | 2026-07-05 |
+| [0005](0005-use-module-client-services-for-cross-module-data-access.md) | Use Module Client Services for Cross-Module Data Access | Accepted | 2026-07-06 |
