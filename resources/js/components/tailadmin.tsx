@@ -1,5 +1,5 @@
 import { Link } from '@inertiajs/react';
-import { useEffect } from 'react';
+import { useEffect, useId, useRef } from 'react';
 import type { ReactNode } from 'react';
 
 type SectionHeaderProps = {
@@ -87,21 +87,81 @@ export function Modal({
     onClose,
     size = 'lg',
 }: ModalProps): ReactNode {
+    const titleId = useId();
+    const onCloseRef = useRef(onClose);
+    const modalRef = useRef<HTMLDivElement>(null);
+    const previousFocusRef = useRef<HTMLElement | null>(null);
+
+    useEffect(() => {
+        onCloseRef.current = onClose;
+    }, [onClose]);
+
     useEffect(() => {
         if (!open) {
+            if (previousFocusRef.current) {
+                previousFocusRef.current.focus();
+                previousFocusRef.current = null;
+            }
+
             return;
+        }
+
+        previousFocusRef.current = document.activeElement as HTMLElement | null;
+
+        if (modalRef.current) {
+            const focusableElements = modalRef.current.querySelectorAll(
+                'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+            ) as NodeListOf<HTMLElement>;
+
+            if (focusableElements.length > 0) {
+                focusableElements[0].focus();
+            }
         }
 
         const handleKeyDown = (event: KeyboardEvent): void => {
             if (event.key === 'Escape') {
-                onClose();
+                onCloseRef.current();
+
+                return;
+            }
+
+            if (event.key === 'Tab' && modalRef.current) {
+                const focusableElements = modalRef.current.querySelectorAll(
+                    'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+                ) as NodeListOf<HTMLElement>;
+
+                if (focusableElements.length === 0) {
+                    return;
+                }
+
+                const firstElement = focusableElements[0];
+                const lastElement =
+                    focusableElements[focusableElements.length - 1];
+
+                if (event.shiftKey) {
+                    if (
+                        document.activeElement === firstElement ||
+                        !modalRef.current.contains(document.activeElement)
+                    ) {
+                        lastElement.focus();
+                        event.preventDefault();
+                    }
+                } else {
+                    if (
+                        document.activeElement === lastElement ||
+                        !modalRef.current.contains(document.activeElement)
+                    ) {
+                        firstElement.focus();
+                        event.preventDefault();
+                    }
+                }
             }
         };
 
         document.addEventListener('keydown', handleKeyDown);
 
         return () => document.removeEventListener('keydown', handleKeyDown);
-    }, [onClose, open]);
+    }, [open]);
 
     if (!open) {
         return null;
@@ -118,7 +178,7 @@ export function Modal({
             className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto px-4 py-6"
             role="dialog"
             aria-modal="true"
-            aria-labelledby="modal-title"
+            aria-labelledby={titleId}
         >
             <button
                 type="button"
@@ -127,6 +187,7 @@ export function Modal({
                 aria-label="Tutup modal"
             />
             <div
+                ref={modalRef}
                 className={`relative flex max-h-[calc(100vh-3rem)] w-full ${widths[size]} flex-col overflow-hidden rounded-3xl bg-white shadow-sm dark:bg-slate-900`}
             >
                 <button
@@ -142,7 +203,7 @@ export function Modal({
                         aria-hidden="true"
                     >
                         <path
-                            d="m6 6 8 8M14 6l-8 8"
+                            d="M6 6 L 14 14 M14 6 L 6 14"
                             stroke="currentColor"
                             strokeWidth="1.8"
                             strokeLinecap="round"
@@ -152,7 +213,7 @@ export function Modal({
 
                 <div className="border-b border-slate-200 px-6 pt-6 pr-16 pb-5 lg:px-8 lg:pt-8 dark:border-white/10">
                     <h2
-                        id="modal-title"
+                        id={titleId}
                         className="text-xl font-semibold text-slate-950 lg:text-2xl dark:text-white"
                     >
                         {title}
@@ -324,7 +385,7 @@ export function DangerButton({
     return (
         <button
             type={type}
-            className={`inline-flex h-9 items-center justify-center rounded-lg border border-rose-200 bg-white px-3 py-1.5 text-xs font-semibold text-rose-600 transition hover:bg-rose-50 hover:text-rose-500 focus:ring-3 focus:ring-rose-500/10 focus:outline-none disabled:cursor-not-allowed disabled:border-rose-100 disabled:bg-rose-50 disabled:text-rose-300 dark:border-rose-500/20 dark:bg-rose-500/10 dark:text-rose-300 dark:hover:bg-rose-500/15 dark:disabled:border-rose-950 dark:disabled:bg-rose-950/40 dark:disabled:text-rose-700 ${className}`}
+            className={`inline-flex items-center justify-center rounded-full border border-rose-200 bg-white px-3 py-1 text-xs font-semibold text-rose-600 transition hover:bg-rose-50 hover:text-rose-500 focus:ring-3 focus:ring-rose-500/10 focus:outline-none disabled:cursor-not-allowed disabled:border-rose-100 disabled:bg-rose-50 disabled:text-rose-300 dark:border-rose-500/20 dark:bg-rose-500/10 dark:text-rose-300 dark:hover:bg-rose-500/15 dark:disabled:border-rose-950 dark:disabled:bg-rose-950/40 dark:disabled:text-rose-700 ${className}`}
         >
             {children}
         </button>
