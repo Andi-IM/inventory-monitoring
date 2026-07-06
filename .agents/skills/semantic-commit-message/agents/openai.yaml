@@ -1,0 +1,4 @@
+interface:
+  display_name: "Semantic Commit Message"
+  short_description: "Draft precise semantic commit messages"
+  default_prompt: "Use $semantic-commit-message to draft a semantic commit message from the current git diff."
