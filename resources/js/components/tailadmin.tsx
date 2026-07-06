@@ -37,7 +37,7 @@ export function SectionHeader({
     return (
         <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.35em] text-cyan-500">
+                <p className="text-xs font-semibold tracking-[0.35em] text-cyan-500 uppercase">
                     {eyebrow}
                 </p>
                 <h2 className="mt-2 text-2xl font-semibold text-slate-950 dark:text-white">
@@ -114,7 +114,12 @@ const baseFieldClass =
     'rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/15 dark:border-white/10 dark:bg-slate-950/50 dark:text-white dark:placeholder:text-slate-500 dark:focus:border-cyan-400 dark:focus:ring-cyan-400/15';
 
 export function Input(props: InputProps): ReactNode {
-    return <input {...props} className={[baseFieldClass, props.className].join(' ')} />;
+    return (
+        <input
+            {...props}
+            className={[baseFieldClass, props.className].join(' ')}
+        />
+    );
 }
 
 export function Textarea(props: TextareaProps): ReactNode {
@@ -127,7 +132,12 @@ export function Textarea(props: TextareaProps): ReactNode {
 }
 
 export function Select(props: SelectProps): ReactNode {
-    return <select {...props} className={[baseFieldClass, props.className].join(' ')} />;
+    return (
+        <select
+            {...props}
+            className={[baseFieldClass, props.className].join(' ')}
+        />
+    );
 }
 
 export function SubmitButton({
@@ -182,7 +192,7 @@ export function TableShell({
                             {headers.map((header) => (
                                 <th
                                     key={header}
-                                    className="px-5 py-4 text-xs font-semibold uppercase tracking-[0.25em]"
+                                    className="px-5 py-4 text-xs font-semibold tracking-[0.25em] uppercase"
                                 >
                                     {header}
                                 </th>
@@ -221,9 +231,13 @@ export function RowValue({
     );
 }
 
-export function StatusBadge({ tone = 'neutral', children }: StatusBadgeProps): ReactNode {
+export function StatusBadge({
+    tone = 'neutral',
+    children,
+}: StatusBadgeProps): ReactNode {
     const tones: Record<NonNullable<StatusBadgeProps['tone']>, string> = {
-        neutral: 'bg-slate-100 text-slate-700 dark:bg-white/10 dark:text-slate-200',
+        neutral:
+            'bg-slate-100 text-slate-700 dark:bg-white/10 dark:text-slate-200',
         success: 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300',
         warning: 'bg-amber-500/10 text-amber-700 dark:text-amber-300',
         danger: 'bg-rose-500/10 text-rose-700 dark:text-rose-300',

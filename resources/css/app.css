@@ -8,14 +8,17 @@
 
 @theme {
     --font-sans:
-        'Outfit', ui-sans-serif, system-ui, sans-serif,
-        'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
-        'Noto Color Emoji';
+        'Outfit', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji',
+        'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
 }
 
 @layer base {
-    *, ::before, ::after {
-        transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
+    *,
+    ::before,
+    ::after {
+        transition-property:
+            color, background-color, border-color, text-decoration-color, fill,
+            stroke;
         transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
         transition-duration: 300ms;
     }

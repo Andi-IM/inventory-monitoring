@@ -61,9 +61,16 @@ export default function Loans({
                         description="Buat pinjaman, pantau status, dan proses pengembalian parsial dari satu layar."
                     />
 
-                    <Form {...store.form()} resetOnSuccess className="grid gap-4 lg:grid-cols-12">
+                    <Form
+                        {...store.form()}
+                        resetOnSuccess
+                        className="grid gap-4 lg:grid-cols-12"
+                    >
                         <Field label="Tipe peminjam">
-                            <Select name="borrower_type" defaultValue="internal">
+                            <Select
+                                name="borrower_type"
+                                defaultValue="internal"
+                            >
                                 <option value="internal">Internal</option>
                                 <option value="external">Eksternal</option>
                             </Select>
@@ -92,7 +99,11 @@ export default function Loans({
                             <Input name="due_at" type="datetime-local" />
                         </Field>
                         <Field label="Unit" hint="Bisa pilih banyak">
-                            <Select name="item_unit_ids[]" multiple className="min-h-40">
+                            <Select
+                                name="item_unit_ids[]"
+                                multiple
+                                className="min-h-40"
+                            >
                                 {availableUnits.map((unit) => (
                                     <option key={unit.id} value={unit.id}>
                                         {unit.asset_code} - {unit.item?.name}
@@ -101,7 +112,10 @@ export default function Loans({
                             </Select>
                         </Field>
                         <Field label="Catatan" hint="Opsional">
-                            <Input name="notes" placeholder="Catatan transaksi" />
+                            <Input
+                                name="notes"
+                                placeholder="Catatan transaksi"
+                            />
                         </Field>
                         <div className="flex items-end lg:col-span-12">
                             <SubmitButton className="w-full sm:w-auto">
@@ -121,11 +135,14 @@ export default function Loans({
                 ) : null}
 
                 {loans.map((loan) => (
-                    <Surface key={loan.id} className="bg-white/95 dark:bg-slate-900/95">
+                    <Surface
+                        key={loan.id}
+                        className="bg-white/95 dark:bg-slate-900/95"
+                    >
                         <SurfaceBody className="space-y-6">
                             <div className="flex flex-wrap items-start justify-between gap-4">
                                 <div>
-                                    <p className="text-xs font-semibold uppercase tracking-[0.35em] text-cyan-500">
+                                    <p className="text-xs font-semibold tracking-[0.35em] text-cyan-500 uppercase">
                                         Loan {loan.code}
                                     </p>
                                     <h3 className="mt-2 text-xl font-semibold text-slate-950 dark:text-white">
@@ -134,7 +151,10 @@ export default function Loans({
                                             '-'}
                                     </h3>
                                     <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                                        Jatuh tempo {new Date(loan.due_at).toLocaleString('id-ID')}
+                                        Jatuh tempo{' '}
+                                        {new Date(loan.due_at).toLocaleString(
+                                            'id-ID',
+                                        )}
                                     </p>
                                 </div>
                                 <StatusBadge
@@ -142,10 +162,11 @@ export default function Loans({
                                         loan.status === 'returned'
                                             ? 'success'
                                             : loan.status === 'overdue'
-                                                ? 'danger'
-                                                : loan.status === 'partially_returned'
-                                                    ? 'warning'
-                                                    : 'info'
+                                              ? 'danger'
+                                              : loan.status ===
+                                                  'partially_returned'
+                                                ? 'warning'
+                                                : 'info'
                                     }
                                 >
                                     {loan.status}
@@ -156,7 +177,7 @@ export default function Loans({
                                 {loan.loan_items.map((item) => (
                                     <div
                                         key={item.id}
-                                        className="grid gap-4 rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4 dark:border-white/10 dark:bg-white/5 md:grid-cols-[1fr_auto]"
+                                        className="grid gap-4 rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4 md:grid-cols-[1fr_auto] dark:border-white/10 dark:bg-white/5"
                                     >
                                         <div>
                                             <p className="font-semibold text-slate-950 dark:text-white">
@@ -177,16 +198,28 @@ export default function Loans({
                                                 })}
                                                 className="grid gap-3 sm:grid-cols-[1fr_1fr_auto]"
                                             >
-                                                <Select name="return_condition" defaultValue="normal">
-                                                    <option value="normal">normal</option>
-                                                    <option value="rusak">rusak</option>
-                                                    <option value="hilang">hilang</option>
+                                                <Select
+                                                    name="return_condition"
+                                                    defaultValue="normal"
+                                                >
+                                                    <option value="normal">
+                                                        normal
+                                                    </option>
+                                                    <option value="rusak">
+                                                        rusak
+                                                    </option>
+                                                    <option value="hilang">
+                                                        hilang
+                                                    </option>
                                                 </Select>
                                                 <Input
                                                     name="return_notes"
                                                     placeholder="Catatan"
                                                 />
-                                                <SubmitButton type="submit" className="w-full sm:w-auto">
+                                                <SubmitButton
+                                                    type="submit"
+                                                    className="w-full sm:w-auto"
+                                                >
                                                     Kembalikan
                                                 </SubmitButton>
                                             </Form>

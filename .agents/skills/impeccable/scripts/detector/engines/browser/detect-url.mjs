@@ -3,12 +3,15 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { finding } from '../../findings.mjs';
-import { filterByProviders } from '../../registry/antipatterns.mjs';
 import { profileFindingsAsync, profileStep, profileStepAsync } from '../../profile/profiler.mjs';
+import { filterByProviders } from '../../registry/antipatterns.mjs';
 import { captureVisualContrastCandidate } from '../visual/screenshot-contrast.mjs';
 
 function serializeDesignSystemForBrowser(designSystem) {
-  if (!designSystem?.present) return null;
+  if (!designSystem?.present) {
+return null;
+}
+
   return {
     present: true,
     hasFonts: designSystem.hasFonts === true,
@@ -27,7 +30,10 @@ function serializeDesignSystemForBrowser(designSystem) {
 }
 
 async function runVisualContrastFallback(page, serializedGroups, options, profile, target) {
-  if (options?.visualContrast === false) return [];
+  if (options?.visualContrast === false) {
+return [];
+}
+
   const maxCandidates = Number.isFinite(options?.visualContrastMaxCandidates)
     ? options.visualContrastMaxCandidates
     : 12;
@@ -41,6 +47,7 @@ async function runVisualContrastFallback(page, serializedGroups, options, profil
 
   let browserAnalyses = [];
   const findings = [];
+
   if (options?.visualContrastBrowser !== false) {
     const browserFindings = await profileFindingsAsync(profile, {
       engine: 'browser',
@@ -49,9 +56,13 @@ async function runVisualContrastFallback(page, serializedGroups, options, profil
       target,
     }, async () => {
       browserAnalyses = await page.evaluate(async ({ maxCandidates, scrollOffscreen }) => {
-        if (typeof window.impeccableAnalyzeVisualContrast !== 'function') return [];
+        if (typeof window.impeccableAnalyzeVisualContrast !== 'function') {
+return [];
+}
+
         return window.impeccableAnalyzeVisualContrast({ maxCandidates, scrollOffscreen });
       }, { maxCandidates, scrollOffscreen });
+
       return browserAnalyses
         .filter(result => result.finding && !existingLowContrastSelectors.has(result.selector))
         .map(result => result.finding);
@@ -60,6 +71,7 @@ async function runVisualContrastFallback(page, serializedGroups, options, profil
   }
 
   let candidates = browserAnalyses.length > 0 ? browserAnalyses : [];
+
   if (candidates.length === 0) {
     candidates = await profileStepAsync(profile, {
       engine: 'browser',
@@ -67,7 +79,10 @@ async function runVisualContrastFallback(page, serializedGroups, options, profil
       ruleId: 'collect-candidates',
       target,
     }, () => page.evaluate(({ maxCandidates }) => {
-      if (typeof window.impeccableCollectVisualContrastCandidates !== 'function') return [];
+      if (typeof window.impeccableCollectVisualContrastCandidates !== 'function') {
+return [];
+}
+
       return window.impeccableCollectVisualContrastCandidates({ maxCandidates });
     }, { maxCandidates }));
   }
@@ -83,7 +98,11 @@ async function runVisualContrastFallback(page, serializedGroups, options, profil
     !existingLowContrastSelectors.has(candidate.selector) &&
     !browserResolvedSelectors.has(candidate.selector)
   );
-  if (options?.visualContrastPixel === false) return findings;
+
+  if (options?.visualContrastPixel === false) {
+return findings;
+}
+
   for (const candidate of filtered) {
     const result = await profileFindingsAsync(profile, {
       engine: 'browser',
@@ -92,10 +111,12 @@ async function runVisualContrastFallback(page, serializedGroups, options, profil
       target,
     }, async () => {
       const finding = await captureVisualContrastCandidate(page, candidate, viewport);
+
       return finding ? [finding] : [];
     });
     findings.push(...result);
   }
+
   return findings;
 }
 
@@ -110,6 +131,7 @@ async function detectUrl(url, options = {}) {
   const viewport = options?.viewport || { width: 1280, height: 800 };
   const externalBrowser = options?.browser || null;
   let puppeteer;
+
   if (!externalBrowser) {
     try {
       puppeteer = await profileStepAsync(profile, {
@@ -131,6 +153,7 @@ async function detectUrl(url, options = {}) {
     'detect-antipatterns-browser.js'
   );
   let browserScript;
+
   try {
     browserScript = profileStep(profile, {
       engine: 'browser',
@@ -159,6 +182,7 @@ async function detectUrl(url, options = {}) {
     target: url,
   }, () => browser.newPage());
   let results = [];
+
   try {
     await profileStepAsync(profile, {
       engine: 'browser',
@@ -172,6 +196,7 @@ async function detectUrl(url, options = {}) {
       ruleId: `goto:${waitUntil}`,
       target: url,
     }, () => page.goto(url, { waitUntil, timeout: 30000 }));
+
     if (settleMs > 0) {
       await profileStepAsync(profile, {
         engine: 'browser',
@@ -209,9 +234,13 @@ async function detectUrl(url, options = {}) {
       target: url,
     }, async () => {
       serializedGroups = await page.evaluate(() => {
-        if (!window.impeccableDetect) return [];
+        if (!window.impeccableDetect) {
+return [];
+}
+
         return window.impeccableDetect({ decorate: false, serialize: true });
       });
+
       return serializedGroups.flatMap(({ findings }) =>
         findings.map(f => ({ id: f.type, snippet: f.detail, ignoreValue: f.ignoreValue || '' }))
       );
@@ -225,6 +254,7 @@ async function detectUrl(url, options = {}) {
       ruleId: 'close-page',
       target: url,
     }, () => page.close().catch(() => {}));
+
     if (!externalBrowser) {
       await profileStepAsync(profile, {
         engine: 'browser',
@@ -234,20 +264,27 @@ async function detectUrl(url, options = {}) {
       }, () => browser.close());
     }
   }
+
   return filterByProviders(results.map(f => {
     const item = finding(f.id, url, f.snippet);
-    if (f.ignoreValue) item.ignoreValue = f.ignoreValue;
+
+    if (f.ignoreValue) {
+item.ignoreValue = f.ignoreValue;
+}
+
     return item;
   }), options.providers);
 }
 
 async function createBrowserDetector(options = {}) {
   let puppeteer;
+
   try {
     puppeteer = await import('puppeteer');
   } catch {
     throw new Error('puppeteer is required for URL scanning. Install: npm install puppeteer');
   }
+
   const launchArgs = options.launchArgs || (process.env.CI ? ['--no-sandbox', '--disable-setuid-sandbox'] : []);
   const browser = options.browser || await puppeteer.default.launch({
     headless: options.headless ?? true,
@@ -259,6 +296,7 @@ async function createBrowserDetector(options = {}) {
     settleMs: Number.isFinite(options.settleMs) ? options.settleMs : 100,
     viewport: options.viewport || { width: 1280, height: 800 },
   };
+
   return {
     browser,
     async detectUrl(url, scanOptions = {}) {
@@ -269,7 +307,9 @@ async function createBrowserDetector(options = {}) {
       });
     },
     async close() {
-      if (ownsBrowser) await browser.close().catch(() => {});
+      if (ownsBrowser) {
+await browser.close().catch(() => {});
+}
     },
   };
 }

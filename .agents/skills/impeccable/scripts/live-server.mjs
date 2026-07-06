@@ -13,25 +13,15 @@
  *   node <scripts_path>/live-server.mjs --help
  */
 
-import http from 'node:http';
-import { randomUUID } from 'node:crypto';
 import { spawn, execFileSync } from 'node:child_process';
+import { randomUUID } from 'node:crypto';
 import fs from 'node:fs';
-import path from 'node:path';
+import http from 'node:http';
 import net from 'node:net';
+import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { parseDesignMd } from './lib/design-parser.mjs';
 import { loadContext } from './context.mjs';
-import {
-  assembleLiveBrowserScript,
-  assertLiveBrowserScriptParts,
-  readLiveBrowserScriptParts,
-  resolveLiveBrowserScriptParts,
-} from './live/browser-script-parts.mjs';
-import { createLiveSessionStore } from './live/session-store.mjs';
-import { validateEvent } from './live/event-validation.mjs';
-import { createManualEditRoutes } from './live/manual-edit-routes.mjs';
-import { LIVE_COMMANDS } from './live/vocabulary.mjs';
+import { parseDesignMd } from './lib/design-parser.mjs';
 import {
   getDesignSidecarPath,
   getLiveDir,
@@ -41,15 +31,25 @@ import {
   resolveDesignSidecarPath,
   writeLiveServerInfo,
 } from './lib/impeccable-paths.mjs';
-import { countByPage as countPendingByPage } from './live/manual-edits-buffer.mjs';
+import {
+  assembleLiveBrowserScript,
+  assertLiveBrowserScriptParts,
+  readLiveBrowserScriptParts,
+  resolveLiveBrowserScriptParts,
+} from './live/browser-script-parts.mjs';
+import { validateEvent } from './live/event-validation.mjs';
 import {
   createManualApplyController,
   summarizeManualApplyFailures,
 } from './live/manual-apply.mjs';
+import { createManualEditRoutes } from './live/manual-edit-routes.mjs';
+import { countByPage as countPendingByPage } from './live/manual-edits-buffer.mjs';
+import { createLiveSessionStore } from './live/session-store.mjs';
 import {
   applyDeferredSvelteComponentAccepts,
   removeAllSvelteComponentSessions,
 } from './live/svelte-component.mjs';
+import { LIVE_COMMANDS } from './live/vocabulary.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 // PRODUCT.md / DESIGN.md live wherever context.mjs resolves. The generated
@@ -133,8 +133,14 @@ const manualEditRoutes = createManualEditRoutes({
 });
 
 function chatAgentLikelyActive() {
-  if (state.pendingPolls.length > 0) return true;
-  if (!state.lastPollAt) return false;
+  if (state.pendingPolls.length > 0) {
+return true;
+}
+
+  if (!state.lastPollAt) {
+return false;
+}
+
   return Date.now() - state.lastPollAt < CHAT_POLL_FRESHNESS_MS;
 }
 
@@ -143,52 +149,82 @@ function chatAgentLikelyActive() {
 const MAX_ANNOTATION_BYTES = 10 * 1024 * 1024;
 
 function enqueueEvent(event) {
-  if (!event || (event.id && state.pendingEvents.some((entry) => entry.event?.id === event.id && entry.event?.type === event.type))) return;
+  if (!event || (event.id && state.pendingEvents.some((entry) => entry.event?.id === event.id && entry.event?.type === event.type))) {
+return;
+}
+
   state.pendingEvents.push({ event, leaseUntil: 0, seq: state.nextEventSeq++ });
   flushPendingPolls();
 }
 
 function restorePendingEventsFromStore() {
-  if (!state.sessionStore) return;
+  if (!state.sessionStore) {
+return;
+}
+
   for (const snapshot of state.sessionStore.listActiveSessions()) {
-    if (snapshot.pendingEvent) enqueueEvent(snapshot.pendingEvent);
+    if (snapshot.pendingEvent) {
+enqueueEvent(snapshot.pendingEvent);
+}
   }
 }
 
 function findAvailablePendingEvent(now = Date.now()) {
   for (const entry of state.pendingEvents) {
-    if (entry.leaseUntil && entry.leaseUntil > now) continue;
+    if (entry.leaseUntil && entry.leaseUntil > now) {
+continue;
+}
+
     return entry;
   }
+
   return null;
 }
 
 function leaseEvent(entry, leaseMs) {
   if (!entry.event?.id) {
     const idx = state.pendingEvents.indexOf(entry);
-    if (idx !== -1) state.pendingEvents.splice(idx, 1);
+
+    if (idx !== -1) {
+state.pendingEvents.splice(idx, 1);
+}
+
     return entry.event;
   }
+
   entry.leaseUntil = Date.now() + leaseMs;
   scheduleLeaseFlush();
   broadcastAgentPollingIfChanged();
+
   return entry.event;
 }
 
 function acknowledgePendingEvent(id) {
-  if (!id) return false;
+  if (!id) {
+return false;
+}
+
   const idx = state.pendingEvents.findIndex((entry) => entry.event?.id === id);
-  if (idx === -1) return false;
+
+  if (idx === -1) {
+return false;
+}
+
   const acknowledged = state.pendingEvents[idx].event;
   state.pendingEvents.splice(idx, 1);
   scheduleLeaseFlush();
   broadcastAgentPollingIfChanged();
+
   return acknowledged;
 }
 
 function findPendingEventById(id) {
-  if (!id) return null;
+  if (!id) {
+return null;
+}
+
   const entry = state.pendingEvents.find((item) => item.event?.id === id);
+
   return entry?.event || null;
 }
 
@@ -200,6 +236,7 @@ function summarizePendingEventForStatus(entry) {
     leased: !!(entry.leaseUntil && entry.leaseUntil > Date.now()),
     leaseUntil: entry.leaseUntil || null,
   };
+
   if (event.type === 'manual_edit_apply') {
     summary.pageUrl = event.pageUrl || null;
     summary.chunk = event.chunk || null;
@@ -208,6 +245,7 @@ function summarizePendingEventForStatus(entry) {
     summary.agentAction = event.agentAction || manualApply.buildAgentAction(event);
     summary.manualApplySummary = manualApply.summarizeEvent(event, manualApply.getDeferred(event.id)?.batch || event.batch);
   }
+
   return summary;
 }
 
@@ -228,22 +266,32 @@ function summarizeActiveSessionForClient(snapshot = {}) {
 }
 
 function activeSessionSummaries() {
-  if (!state.sessionStore) return [];
+  if (!state.sessionStore) {
+return [];
+}
+
   return state.sessionStore.listActiveSessions().map((snapshot) => summarizeActiveSessionForClient(snapshot));
 }
 
 function cancelQueuedAnonymousExitEvents() {
   let removed = 0;
+
   for (let i = state.pendingEvents.length - 1; i >= 0; i -= 1) {
     const event = state.pendingEvents[i]?.event;
-    if (event?.type !== 'exit' || event.id) continue;
+
+    if (event?.type !== 'exit' || event.id) {
+continue;
+}
+
     state.pendingEvents.splice(i, 1);
     removed += 1;
   }
+
   if (removed > 0) {
     scheduleLeaseFlush();
     broadcastAgentPollingIfChanged();
   }
+
   return removed;
 }
 
@@ -252,12 +300,17 @@ function scheduleLeaseFlush() {
     clearTimeout(state.leaseTimer);
     state.leaseTimer = null;
   }
+
   const now = Date.now();
   const nextLeaseUntil = state.pendingEvents
     .map((entry) => entry.leaseUntil || 0)
     .filter((leaseUntil) => leaseUntil > now)
     .sort((a, b) => a - b)[0];
-  if (!nextLeaseUntil) return;
+
+  if (!nextLeaseUntil) {
+return;
+}
+
   state.leaseTimer = setTimeout(() => {
     state.leaseTimer = null;
     flushPendingPolls();
@@ -267,30 +320,43 @@ function scheduleLeaseFlush() {
 
 function flushPendingPolls() {
   let changed = false;
+
   while (state.pendingPolls.length > 0) {
     const entry = findAvailablePendingEvent();
+
     if (!entry) {
       scheduleLeaseFlush();
       broadcastAgentPollingIfChanged();
+
       return;
     }
+
     const poll = state.pendingPolls.shift();
     poll.resolve(leaseEvent(entry, poll.leaseMs));
     changed = true;
   }
+
   scheduleLeaseFlush();
-  if (changed) broadcastAgentPollingIfChanged();
+
+  if (changed) {
+broadcastAgentPollingIfChanged();
+}
 }
 
 function agentPollingConnected() {
   const now = Date.now();
+
   return state.pendingPolls.length > 0
     || state.pendingEvents.some((entry) => entry.leaseUntil && entry.leaseUntil > now);
 }
 
 function broadcastAgentPollingIfChanged() {
   const connected = agentPollingConnected();
-  if (state.lastAgentPollingBroadcast === connected) return;
+
+  if (state.lastAgentPollingBroadcast === connected) {
+return;
+}
+
   state.lastAgentPollingBroadcast = connected;
   broadcast({ type: 'agent_polling', connected });
 }
@@ -298,8 +364,11 @@ function broadcastAgentPollingIfChanged() {
 /** Push a message to all connected SSE clients. */
 function broadcast(msg) {
   const data = 'data: ' + JSON.stringify(msg) + '\n\n';
+
   for (const res of state.sseClients) {
-    try { res.write(data); } catch { /* client gone */ }
+    try {
+ res.write(data); 
+} catch { /* client gone */ }
   }
 }
 
@@ -311,6 +380,7 @@ function recordManualEditActivity(type, details = {}) {
     ...details,
   };
   state.manualEditActivity = entry;
+
   if (DEBUG_MANUAL_EDIT_EVENTS) {
     try {
       const filePath = path.join(getLiveDir(process.cwd()), 'manual-edit-events.jsonl');
@@ -320,13 +390,16 @@ function recordManualEditActivity(type, details = {}) {
       /* diagnostics are best-effort; never block live mode on observability */
     }
   }
+
   broadcast(entry);
+
   return entry;
 }
 
 function getManualEditStatus() {
   try {
     const { totalCount, perPage } = countPendingByPage(process.cwd());
+
     return { totalCount, perPage, lastActivity: state.manualEditActivity };
   } catch (err) {
     return {
@@ -353,14 +426,18 @@ function loadBrowserScripts() {
     path.join(process.cwd(), 'node_modules', 'impeccable', 'cli', 'engine', 'detect-antipatterns-browser.js'),
   ];
   let detectScript = '';
+
   for (const p of detectPaths) {
-    try { detectScript = fs.readFileSync(p, 'utf-8'); break; } catch { /* try next */ }
+    try {
+ detectScript = fs.readFileSync(p, 'utf-8'); break; 
+} catch { /* try next */ }
   }
 
   // Browser script parts: DO NOT cache. Return paths so the /live.js handler
   // can re-read every part on each request. Editing browser code during
   // iteration should land on the next tab reload, not require a server restart.
   const liveScriptParts = resolveLiveBrowserScriptParts(__dirname);
+
   try {
     assertLiveBrowserScriptParts(liveScriptParts);
   } catch (err) {
@@ -379,7 +456,11 @@ function hasProjectContext() {
 }
 
 function statOrNull(filePath) {
-  try { return fs.statSync(filePath); } catch { return null; }
+  try {
+ return fs.statSync(filePath); 
+} catch {
+ return null; 
+}
 }
 
 // HTTP request handler
@@ -391,7 +472,12 @@ function createRequestHandler({ detectScript, liveScriptParts }) {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-    if (req.method === 'OPTIONS') { res.writeHead(204); res.end(); return; }
+
+    if (req.method === 'OPTIONS') {
+ res.writeHead(204); res.end();
+
+ return; 
+}
 
     const p = url.pathname;
 
@@ -402,13 +488,16 @@ function createRequestHandler({ detectScript, liveScriptParts }) {
       // sessions — during iteration, a cached old script silently breaks
       // every subsequent session.
       let parts;
+
       try {
         parts = readLiveBrowserScriptParts(liveScriptParts);
       } catch (err) {
         res.writeHead(500, { 'Content-Type': 'text/plain' });
         res.end('Error reading live browser scripts: ' + err.message);
+
         return;
       }
+
       const body = assembleLiveBrowserScript({
         token: state.token,
         port: state.port,
@@ -421,12 +510,20 @@ function createRequestHandler({ detectScript, liveScriptParts }) {
         'Pragma': 'no-cache',
       });
       res.end(body);
+
       return;
     }
+
     if (p === '/detect.js' || p === '/') {
-      if (!detectScript) { res.writeHead(404); res.end('Not available'); return; }
+      if (!detectScript) {
+ res.writeHead(404); res.end('Not available');
+
+ return; 
+}
+
       res.writeHead(200, { 'Content-Type': 'application/javascript' });
       res.end(detectScript);
+
       return;
     }
 
@@ -435,6 +532,7 @@ function createRequestHandler({ detectScript, liveScriptParts }) {
     // window.modernScreenshot.domToBlob(...) for capture.
     if (p === '/modern-screenshot.js') {
       const vendorPath = path.join(__dirname, 'modern-screenshot.umd.js');
+
       try {
         res.writeHead(200, {
           'Content-Type': 'application/javascript',
@@ -444,6 +542,7 @@ function createRequestHandler({ detectScript, liveScriptParts }) {
       } catch {
         res.writeHead(404); res.end('Vendor script not found');
       }
+
       return;
     }
 
@@ -453,48 +552,73 @@ function createRequestHandler({ detectScript, liveScriptParts }) {
     // bridge and preserves the "one shot from the user's POV" UX.
     if (p === '/annotation' && req.method === 'POST') {
       const token = url.searchParams.get('token');
-      if (token !== state.token) { res.writeHead(401); res.end('Unauthorized'); return; }
+
+      if (token !== state.token) {
+ res.writeHead(401); res.end('Unauthorized');
+
+ return; 
+}
+
       const eventId = url.searchParams.get('eventId');
+
       if (!eventId || !/^[A-Za-z0-9_-]{1,64}$/.test(eventId)) {
         res.writeHead(400, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ error: 'Invalid eventId' }));
+
         return;
       }
+
       if ((req.headers['content-type'] || '').toLowerCase() !== 'image/png') {
         res.writeHead(415, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ error: 'Content-Type must be image/png' }));
+
         return;
       }
+
       if (!state.sessionDir) {
         res.writeHead(500, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ error: 'Session dir unavailable' }));
+
         return;
       }
+
       const chunks = [];
       let total = 0;
       let aborted = false;
       req.on('data', (c) => {
-        if (aborted) return;
+        if (aborted) {
+return;
+}
+
         total += c.length;
+
         if (total > MAX_ANNOTATION_BYTES) {
           aborted = true;
           res.writeHead(413, { 'Content-Type': 'application/json' });
           res.end(JSON.stringify({ error: 'Payload too large' }));
           req.destroy();
+
           return;
         }
+
         chunks.push(c);
       });
       req.on('end', () => {
-        if (aborted) return;
+        if (aborted) {
+return;
+}
+
         const absPath = path.join(state.sessionDir, eventId + '.png');
+
         try {
           fs.writeFileSync(absPath, Buffer.concat(chunks));
         } catch (err) {
           res.writeHead(500, { 'Content-Type': 'application/json' });
           res.end(JSON.stringify({ error: 'Write failed: ' + err.message }));
+
           return;
         }
+
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ ok: true, path: absPath }));
       });
@@ -504,13 +628,20 @@ function createRequestHandler({ detectScript, liveScriptParts }) {
           res.end(JSON.stringify({ error: 'Upload failed' }));
         }
       });
+
       return;
     }
 
     // --- Health ---
     if (p === '/status') {
       const token = url.searchParams.get('token');
-      if (token !== state.token) { res.writeHead(401, { 'Content-Type': 'application/json' }); res.end(JSON.stringify({ error: 'Unauthorized' })); return; }
+
+      if (token !== state.token) {
+ res.writeHead(401, { 'Content-Type': 'application/json' }); res.end(JSON.stringify({ error: 'Unauthorized' }));
+
+ return; 
+}
+
       const sessions = activeSessionSummaries();
       res.writeHead(200, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({
@@ -522,6 +653,7 @@ function createRequestHandler({ detectScript, liveScriptParts }) {
         activeSessions: sessions,
         manualEdits: getManualEditStatus(),
       }));
+
       return;
     }
 
@@ -532,6 +664,7 @@ function createRequestHandler({ detectScript, liveScriptParts }) {
         hasProjectContext: hasProjectContext(),
         connectedClients: state.sseClients.size,
       }));
+
       return;
     }
 
@@ -548,7 +681,12 @@ function createRequestHandler({ detectScript, liveScriptParts }) {
     //   /design-system/raw     returns DESIGN.md markdown verbatim
     if (p === '/design-system.json' || p === '/design-system/raw') {
       const token = url.searchParams.get('token');
-      if (token !== state.token) { res.writeHead(401); res.end('Unauthorized'); return; }
+
+      if (token !== state.token) {
+ res.writeHead(401); res.end('Unauthorized');
+
+ return; 
+}
 
       const mdPath = DESIGN_MD_PATH;
       const jsonPath = resolveDesignSidecarPath(process.cwd(), PROJECT_CONTEXT.designContextDir || CONTEXT_DIR) || getDesignSidecarPath(process.cwd());
@@ -556,15 +694,22 @@ function createRequestHandler({ detectScript, liveScriptParts }) {
       const jsonStat = statOrNull(jsonPath);
 
       if (p === '/design-system/raw') {
-        if (!mdStat) { res.writeHead(404); res.end('Not found'); return; }
+        if (!mdStat) {
+ res.writeHead(404); res.end('Not found');
+
+ return; 
+}
+
         res.writeHead(200, { 'Content-Type': 'text/markdown; charset=utf-8' });
         res.end(fs.readFileSync(mdPath, 'utf-8'));
+
         return;
       }
 
       if (!mdStat && !jsonStat) {
         res.writeHead(404, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ present: false }));
+
         return;
       }
 
@@ -593,29 +738,62 @@ function createRequestHandler({ detectScript, liveScriptParts }) {
 
       res.writeHead(200, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify(response));
+
       return;
     }
 
     // --- Source file (no-HMR fallback) ---
     if (p === '/source') {
       const token = url.searchParams.get('token');
-      if (token !== state.token) { res.writeHead(401); res.end('Unauthorized'); return; }
+
+      if (token !== state.token) {
+ res.writeHead(401); res.end('Unauthorized');
+
+ return; 
+}
+
       const filePath = url.searchParams.get('path');
-      if (!filePath || filePath.includes('..')) { res.writeHead(400); res.end('Bad path'); return; }
+
+      if (!filePath || filePath.includes('..')) {
+ res.writeHead(400); res.end('Bad path');
+
+ return; 
+}
+
       const absPath = path.resolve(process.cwd(), filePath);
-      if (!absPath.startsWith(process.cwd())) { res.writeHead(403); res.end('Forbidden'); return; }
+
+      if (!absPath.startsWith(process.cwd())) {
+ res.writeHead(403); res.end('Forbidden');
+
+ return; 
+}
+
       let content;
-      try { content = fs.readFileSync(absPath, 'utf-8'); }
-      catch { res.writeHead(404); res.end('File not found'); return; }
+
+      try {
+ content = fs.readFileSync(absPath, 'utf-8'); 
+} catch {
+ res.writeHead(404); res.end('File not found');
+
+ return; 
+}
+
       res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
       res.end(content);
+
       return;
     }
 
     // --- SSE: server→browser push (replaces WebSocket) ---
     if (p === '/events' && req.method === 'GET') {
       const token = url.searchParams.get('token');
-      if (token !== state.token) { res.writeHead(401); res.end('Unauthorized'); return; }
+
+      if (token !== state.token) {
+ res.writeHead(401); res.end('Unauthorized');
+
+ return; 
+}
+
       clearTimeout(state.exitTimer);
       state.exitTimer = null;
       cancelQueuedAnonymousExitEvents();
@@ -635,96 +813,137 @@ function createRequestHandler({ detectScript, liveScriptParts }) {
 
       // Keepalive: SSE comment every 30s prevents silent connection drops.
       const heartbeat = setInterval(() => {
-        try { res.write(': keepalive\n\n'); } catch { clearInterval(heartbeat); }
+        try {
+ res.write(': keepalive\n\n'); 
+} catch {
+ clearInterval(heartbeat); 
+}
       }, SSE_HEARTBEAT_INTERVAL);
 
       req.on('close', () => {
         clearInterval(heartbeat);
         state.sseClients.delete(res);
+
         if (state.sseClients.size === 0) {
           clearTimeout(state.exitTimer);
           state.exitTimer = setTimeout(() => {
-            if (state.sseClients.size === 0) enqueueEvent({ type: 'exit' });
+            if (state.sseClients.size === 0) {
+enqueueEvent({ type: 'exit' });
+}
           }, 8000);
         }
       });
+
       return;
     }
 
-    if (manualEditRoutes(req, res, url)) return;
+    if (manualEditRoutes(req, res, url)) {
+return;
+}
 
     // --- Browser→server events (replaces WebSocket messages) ---
     if (p === '/events' && req.method === 'POST') {
       let body = '';
-      req.on('data', (c) => { body += c; });
+      req.on('data', (c) => {
+ body += c; 
+});
       req.on('end', () => {
         let msg;
-        try { msg = JSON.parse(body); } catch {
+
+        try {
+ msg = JSON.parse(body); 
+} catch {
           res.writeHead(400, { 'Content-Type': 'application/json' });
           res.end(JSON.stringify({ error: 'Invalid JSON' }));
+
           return;
         }
+
         if (msg.token !== state.token) {
           res.writeHead(401, { 'Content-Type': 'application/json' });
           res.end(JSON.stringify({ error: 'Unauthorized' }));
+
           return;
         }
+
         // Defense in depth: manual copy edits must use the staged stash/apply
         // endpoints. The direct Save event path is disabled in the browser.
         if (msg.type === 'manual_edits') {
           res.writeHead(400, { 'Content-Type': 'application/json' });
           res.end(JSON.stringify({ error: 'manual_edits must POST to /manual-edit-stash, not /events' }));
+
           return;
         }
+
         if (msg.type === 'manual_edit_apply') {
           res.writeHead(400, { 'Content-Type': 'application/json' });
           res.end(JSON.stringify({ error: 'manual_edit_apply is disabled; use /manual-edit-stash then /manual-edit-commit' }));
+
           return;
         }
+
         const error = validateEvent(msg);
+
         if (error) {
           res.writeHead(400, { 'Content-Type': 'application/json' });
           res.end(JSON.stringify({ error }));
+
           return;
         }
+
         if (state.sessionStore && msg.id) {
           try {
             state.sessionStore.appendEvent(msg);
           } catch (err) {
             res.writeHead(500, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({ error: 'session_store_append_failed', message: err.message }));
+
             return;
           }
         }
+
         if (msg.type === 'exit') {
           cleanupSvelteComponentSessionsBeforeExit();
         }
+
         if (msg.type !== 'checkpoint') {
           enqueueEvent(msg);
         }
+
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ ok: true }));
       });
+
       return;
     }
 
     // --- Stop ---
     if (p === '/stop') {
       const token = url.searchParams.get('token');
-      if (token !== state.token) { res.writeHead(401); res.end('Unauthorized'); return; }
+
+      if (token !== state.token) {
+ res.writeHead(401); res.end('Unauthorized');
+
+ return; 
+}
+
       res.writeHead(200, { 'Content-Type': 'text/plain' });
       res.end('stopping');
       shutdown();
+
       return;
     }
 
     // --- Agent poll ---
     if (p === '/poll' && req.method === 'GET') {
       handlePollGet(req, res, url);
+
       return;
     }
+
     if (p === '/poll' && req.method === 'POST') {
       handlePollPost(req, res);
+
       return;
     }
 
@@ -738,24 +957,34 @@ function createRequestHandler({ detectScript, liveScriptParts }) {
 
 function handlePollGet(req, res, url) {
   const token = url.searchParams.get('token');
+
   if (token !== state.token) {
     res.writeHead(401, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ error: 'Unauthorized' }));
+
     return;
   }
+
   state.lastPollAt = Date.now();
   const timeout = parseInt(url.searchParams.get('timeout') || DEFAULT_POLL_TIMEOUT, 10);
   const leaseMs = parseInt(url.searchParams.get('leaseMs') || '30000', 10);
   const available = findAvailablePendingEvent();
+
   if (available) {
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify(leaseEvent(available, leaseMs)));
+
     return;
   }
+
   const poll = { resolve, leaseMs };
   const timer = setTimeout(() => {
     const idx = state.pendingPolls.indexOf(poll);
-    if (idx !== -1) state.pendingPolls.splice(idx, 1);
+
+    if (idx !== -1) {
+state.pendingPolls.splice(idx, 1);
+}
+
     broadcastAgentPollingIfChanged();
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ type: 'timeout' }));
@@ -772,30 +1001,51 @@ function handlePollGet(req, res, url) {
   req.on('close', () => {
     clearTimeout(timer);
     const idx = state.pendingPolls.indexOf(poll);
-    if (idx !== -1) state.pendingPolls.splice(idx, 1);
+
+    if (idx !== -1) {
+state.pendingPolls.splice(idx, 1);
+}
+
     broadcastAgentPollingIfChanged();
   });
 }
 
 function sessionFileMetadataFromPollReply(file) {
-  if (!file || typeof file !== 'string') return { file };
+  if (!file || typeof file !== 'string') {
+return { file };
+}
+
   const normalized = file.split(path.sep).join('/');
   const base = { file: normalized };
-  if (!normalized.endsWith('/manifest.json') && normalized !== 'manifest.json') return base;
-  if (!normalized.includes('node_modules/.impeccable-live/') && !normalized.includes('src/lib/impeccable/')) return base;
+
+  if (!normalized.endsWith('/manifest.json') && normalized !== 'manifest.json') {
+return base;
+}
+
+  if (!normalized.includes('node_modules/.impeccable-live/') && !normalized.includes('src/lib/impeccable/')) {
+return base;
+}
 
   let full;
+
   try {
     full = path.resolve(process.cwd(), normalized);
     const rel = path.relative(process.cwd(), full);
-    if (!rel || rel.startsWith('..') || path.isAbsolute(rel)) return base;
+
+    if (!rel || rel.startsWith('..') || path.isAbsolute(rel)) {
+return base;
+}
   } catch {
     return base;
   }
 
   try {
     const manifest = JSON.parse(fs.readFileSync(full, 'utf-8'));
-    if (manifest?.previewMode !== 'svelte-component' || !manifest.sourceFile) return base;
+
+    if (manifest?.previewMode !== 'svelte-component' || !manifest.sourceFile) {
+return base;
+}
+
     return {
       file: String(manifest.sourceFile).split(path.sep).join('/'),
       sourceFile: String(manifest.sourceFile).split(path.sep).join('/'),
@@ -809,22 +1059,33 @@ function sessionFileMetadataFromPollReply(file) {
 
 function handlePollPost(req, res) {
   let body = '';
-  req.on('data', (c) => { body += c; });
+  req.on('data', (c) => {
+ body += c; 
+});
   req.on('end', () => {
     let msg;
-    try { msg = JSON.parse(body); } catch {
+
+    try {
+ msg = JSON.parse(body); 
+} catch {
       res.writeHead(400, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({ error: 'Invalid JSON' }));
+
       return;
     }
+
     if (msg.token !== state.token) {
       res.writeHead(401, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({ error: 'Unauthorized' }));
+
       return;
     }
+
     const pendingApplyDeferred = manualApply.getDeferred(msg.id);
+
     if (pendingApplyDeferred) {
       const validation = manualApply.validateResultMessage(msg, pendingApplyDeferred);
+
       if (!validation.ok) {
         recordManualEditActivity('manual_edit_apply_reply_invalid', {
           id: msg.id,
@@ -836,8 +1097,10 @@ function handlePollPost(req, res) {
         });
         res.writeHead(400, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify(validation.body));
+
         return;
       }
+
       recordManualEditActivity('manual_edit_apply_reply_received', {
         id: msg.id,
         pageUrl: pendingApplyDeferred.pageUrl,
@@ -854,8 +1117,10 @@ function handlePollPost(req, res) {
       flushPendingPolls();
       res.writeHead(200, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({ ok: true }));
+
       return;
     }
+
     if (manualApply.hasTimedOutId(msg.id)) {
       const rollback = manualApply.rollbackTimedOutReply(msg);
       recordManualEditActivity('manual_edit_apply_stale_reply_rejected', {
@@ -865,9 +1130,12 @@ function handlePollPost(req, res) {
       });
       res.writeHead(409, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({ error: 'stale_manual_edit_apply_reply', ...rollback }));
+
       return;
     }
+
     const pendingEventBeforeAck = findPendingEventById(msg.id);
+
     if (pendingEventBeforeAck?.type === 'steer' && msg.type === 'steer_done'
         && !msg.file && !(typeof msg.message === 'string' && msg.message.trim())) {
       res.writeHead(400, { 'Content-Type': 'application/json' });
@@ -875,18 +1143,26 @@ function handlePollPost(req, res) {
         error: 'steer_done_requires_file_or_message',
         hint: 'Reply with --file after writing source, or include a message explaining an intentional no-op.',
       }));
+
       return;
     }
+
     const acknowledgedEvent = acknowledgePendingEvent(msg.id);
     let skipJournalReply = false;
     let existingSession = null;
+
     if (!acknowledgedEvent && state.sessionStore && msg.id) {
       try {
         existingSession = state.sessionStore.getSnapshot(msg.id, { includeCompleted: true });
-        if (!existingSession?.updatedAt) existingSession = null;
+
+        if (!existingSession?.updatedAt) {
+existingSession = null;
+}
+
         skipJournalReply = existingSession?.phase === 'completed' || existingSession?.phase === 'discarded';
       } catch { /* fall through and record the reply normally */ }
     }
+
     if (!acknowledgedEvent && !existingSession) {
       recordManualEditActivity('manual_edit_poll_reply_unknown', {
         id: msg.id || null,
@@ -897,9 +1173,12 @@ function handlePollPost(req, res) {
         error: msg.id ? 'unknown_poll_reply_id' : 'missing_poll_reply_id',
         id: msg.id,
       }));
+
       return;
     }
+
     const replyFileMeta = sessionFileMetadataFromPollReply(msg.file);
+
     if (state.sessionStore && msg.id && !skipJournalReply) {
       try {
         const eventType = msg.type === 'steer_done'
@@ -924,6 +1203,7 @@ function handlePollPost(req, res) {
         });
       } catch { /* keep reply path best-effort; browser still needs SSE */ }
     }
+
     flushPendingPolls();
     // Forward the reply to the browser via SSE
     broadcast({
@@ -950,16 +1230,37 @@ let httpServer = null;
 function shutdown() {
   cleanupSvelteComponentSessionsBeforeExit();
   removeLiveServerInfo(process.cwd());
-  if (state.leaseTimer) clearTimeout(state.leaseTimer);
+
+  if (state.leaseTimer) {
+clearTimeout(state.leaseTimer);
+}
+
   state.leaseTimer = null;
+
   if (state.sessionDir) {
-    try { fs.rmSync(state.sessionDir, { recursive: true, force: true }); } catch {}
+    try {
+ fs.rmSync(state.sessionDir, { recursive: true, force: true }); 
+} catch {}
   }
-  for (const res of state.sseClients) { try { res.end(); } catch {} }
+
+  for (const res of state.sseClients) {
+ try {
+ res.end(); 
+} catch {} 
+}
+
   state.sseClients.clear();
-  for (const poll of state.pendingPolls) poll.resolve({ type: 'exit' });
+
+  for (const poll of state.pendingPolls) {
+poll.resolve({ type: 'exit' });
+}
+
   state.pendingPolls.length = 0;
-  if (httpServer) httpServer.close();
+
+  if (httpServer) {
+httpServer.close();
+}
+
   process.exit(0);
 }
 
@@ -974,6 +1275,7 @@ function cleanupSvelteComponentSessionsBeforeExit() {
 function applyLegacyDeferredAcceptsOnStartup() {
   try {
     const result = applyDeferredSvelteComponentAccepts(process.cwd());
+
     if (result.applied > 0 || result.failed > 0) {
       console.log('[impeccable] applied legacy deferred Svelte component accepts:', JSON.stringify(result));
     }
@@ -1022,24 +1324,32 @@ Endpoints:
 
 if (args.includes('stop')) {
   const keepInject = args.includes('--keep-inject');
+
   try {
     const { info } = readLiveServerInfo(process.cwd()) || {};
     const res = await fetch(`http://localhost:${info.port}/stop?token=${info.token}`);
-    if (res.ok) console.log(`Stopped live server on port ${info.port}.`);
+
+    if (res.ok) {
+console.log(`Stopped live server on port ${info.port}.`);
+}
   } catch {
     console.log('No running live server found.');
   }
+
   if (!keepInject) {
     const injectPath = path.join(__dirname, 'live-inject.mjs');
+
     try {
       const out = execFileSync(process.execPath, [injectPath, '--remove'], {
         encoding: 'utf-8',
         cwd: process.cwd(),
       });
       const line = out.trim().split('\n').filter(Boolean).pop();
+
       if (line) {
         try {
           const j = JSON.parse(line);
+
           if (j.removed === true) {
             console.log(`Removed live script tag from ${j.file}.`);
           }
@@ -1055,6 +1365,7 @@ if (args.includes('stop')) {
       console.warn(`Note: could not remove live script tag (${detail.split('\n')[0]})`);
     }
   }
+
   process.exit(0);
 }
 
@@ -1072,32 +1383,40 @@ if (args.includes('--background')) {
 
   // Poll for the PID file (the child writes it once the HTTP server is listening).
   const deadline = Date.now() + 10_000;
+
   while (Date.now() < deadline) {
     try {
       const { info } = readLiveServerInfo(process.cwd()) || {};
+
       if (info.pid !== process.pid) {
         // Output JSON so the agent can read port + token from stdout.
         console.log(JSON.stringify(info));
         process.exit(0);
       }
     } catch { /* not ready yet */ }
+
     await new Promise(r => setTimeout(r, 200));
   }
+
   console.error('Timed out waiting for live server to start.');
   process.exit(1);
 }
 
 // Check for existing session
 const existingRecord = readLiveServerInfo(process.cwd());
+
 if (existingRecord?.info) {
   const existing = existingRecord.info;
+
   try {
     process.kill(existing.pid, 0);
     console.error(`Live server already running on port ${existing.port} (pid ${existing.pid}).`);
     console.error('Stop it first with: node ' + path.basename(fileURLToPath(import.meta.url)) + ' stop');
     process.exit(1);
   } catch {
-    try { fs.unlinkSync(existingRecord.path); } catch {}
+    try {
+ fs.unlinkSync(existingRecord.path); 
+} catch {}
   }
 }
 

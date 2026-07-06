@@ -21,7 +21,11 @@ export function getDesignSidecarCandidates(cwd = process.cwd(), contextDir = cwd
     path.join(projectRoot, 'DESIGN.json'),
   ];
   const contextLegacy = path.join(contextDir, 'DESIGN.json');
-  if (!candidates.includes(contextLegacy)) candidates.push(contextLegacy);
+
+  if (!candidates.includes(contextLegacy)) {
+candidates.push(contextLegacy);
+}
+
   return candidates;
 }
 
@@ -44,14 +48,24 @@ export function getLegacyLiveConfigPath(scriptsDir) {
 export function resolveLiveConfigPath({ cwd = process.cwd(), scriptsDir, env = process.env, targetPath } = {}) {
   if (env.IMPECCABLE_LIVE_CONFIG && env.IMPECCABLE_LIVE_CONFIG.trim()) {
     const configured = env.IMPECCABLE_LIVE_CONFIG.trim();
+
     return path.isAbsolute(configured) ? configured : path.resolve(cwd, configured);
   }
+
   const primary = getLiveConfigPath(cwd, { targetPath });
-  if (fs.existsSync(primary)) return primary;
+
+  if (fs.existsSync(primary)) {
+return primary;
+}
+
   if (scriptsDir) {
     const legacy = getLegacyLiveConfigPath(scriptsDir);
-    if (fs.existsSync(legacy)) return legacy;
+
+    if (fs.existsSync(legacy)) {
+return legacy;
+}
   }
+
   return primary;
 }
 
@@ -67,21 +81,28 @@ export function readLiveServerInfo(cwd = process.cwd(), options = {}) {
   for (const filePath of [getLiveServerPath(cwd, options), getLegacyLiveServerPath(cwd, options)]) {
     try {
       const info = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
+
       if (info && typeof info.pid === 'number' && !isLiveServerPidReachable(info.pid)) {
-        try { fs.unlinkSync(filePath); } catch {}
+        try {
+ fs.unlinkSync(filePath); 
+} catch {}
+
         continue;
       }
+
       return { info, path: filePath };
     } catch {
       /* try next */
     }
   }
+
   return null;
 }
 
 export function isLiveServerPidReachable(pid) {
   try {
     process.kill(pid, 0);
+
     return true;
   } catch (err) {
     // ESRCH means "no such process". EPERM means the process exists but this
@@ -94,12 +115,15 @@ export function writeLiveServerInfo(cwd = process.cwd(), info, options = {}) {
   const filePath = getLiveServerPath(cwd, options);
   fs.mkdirSync(path.dirname(filePath), { recursive: true });
   fs.writeFileSync(filePath, JSON.stringify(info));
+
   return filePath;
 }
 
 export function removeLiveServerInfo(cwd = process.cwd(), options = {}) {
   for (const filePath of [getLiveServerPath(cwd, options), getLegacyLiveServerPath(cwd, options)]) {
-    try { fs.unlinkSync(filePath); } catch {}
+    try {
+ fs.unlinkSync(filePath); 
+} catch {}
   }
 }
 

@@ -74,7 +74,9 @@ function getInitialTheme(): 'light' | 'dark' {
         return storedTheme;
     }
 
-    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    return window.matchMedia('(prefers-color-scheme: dark)').matches
+        ? 'dark'
+        : 'light';
 }
 
 export function AppLayout({ title, children }: AppLayoutProps) {
@@ -98,7 +100,9 @@ export function AppLayout({ title, children }: AppLayoutProps) {
     };
 
     const toggleTheme = (): void => {
-        setTheme((currentTheme) => (currentTheme === 'dark' ? 'light' : 'dark'));
+        setTheme((currentTheme) =>
+            currentTheme === 'dark' ? 'light' : 'dark',
+        );
     };
 
     return (
@@ -115,7 +119,7 @@ export function AppLayout({ title, children }: AppLayoutProps) {
                 />
 
                 <aside
-                    className={`fixed inset-y-0 left-0 z-50 flex w-[280px] flex-col border-r border-slate-200 bg-white transition-transform duration-300 dark:border-white/10 dark:bg-slate-950 lg:static lg:translate-x-0 ${
+                    className={`fixed inset-y-0 left-0 z-50 flex w-[280px] flex-col border-r border-slate-200 bg-white transition-transform duration-300 lg:static lg:translate-x-0 dark:border-white/10 dark:bg-slate-950 ${
                         sidebarOpen ? 'translate-x-0' : '-translate-x-full'
                     }`}
                 >
@@ -129,7 +133,7 @@ export function AppLayout({ title, children }: AppLayoutProps) {
                             <p className="text-2xl font-semibold text-slate-950 dark:text-white">
                                 HERTS
                             </p>
-                            <p className="text-xs uppercase tracking-[0.35em] text-slate-400 dark:text-slate-500">
+                            <p className="text-xs tracking-[0.35em] text-slate-400 uppercase dark:text-slate-500">
                                 Inventory Monitor
                             </p>
                         </div>
@@ -138,7 +142,7 @@ export function AppLayout({ title, children }: AppLayoutProps) {
                     <div className="flex-1 overflow-y-auto px-4 pb-6">
                         {navigation.map((group) => (
                             <div key={group.heading} className="mt-2">
-                                <h3 className="mb-3 px-3 text-xs font-semibold uppercase tracking-[0.25em] text-slate-400 dark:text-slate-500">
+                                <h3 className="mb-3 px-3 text-xs font-semibold tracking-[0.25em] text-slate-400 uppercase dark:text-slate-500">
                                     {group.heading}
                                 </h3>
                                 <div className="space-y-1">
@@ -150,8 +154,12 @@ export function AppLayout({ title, children }: AppLayoutProps) {
                                                 key={item.label}
                                                 href={item.href}
                                                 prefetch
-                                                onClick={() => setSidebarOpen(false)}
-                                                aria-current={active ? 'page' : undefined}
+                                                onClick={() =>
+                                                    setSidebarOpen(false)
+                                                }
+                                                aria-current={
+                                                    active ? 'page' : undefined
+                                                }
                                                 className={`group flex items-center justify-between rounded-2xl px-3 py-3.5 text-sm transition ${
                                                     active
                                                         ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-500/15 dark:text-indigo-200'
@@ -192,7 +200,7 @@ export function AppLayout({ title, children }: AppLayoutProps) {
                             <div className="flex items-center gap-3">
                                 <button
                                     type="button"
-                                    className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-600 transition hover:bg-slate-100 dark:border-white/10 dark:bg-white/5 dark:text-slate-300 dark:hover:bg-white/10 lg:hidden"
+                                    className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-600 transition hover:bg-slate-100 lg:hidden dark:border-white/10 dark:bg-white/5 dark:text-slate-300 dark:hover:bg-white/10"
                                     onClick={() => setSidebarOpen(true)}
                                     aria-label="Open sidebar"
                                 >
@@ -203,7 +211,7 @@ export function AppLayout({ title, children }: AppLayoutProps) {
                                     </span>
                                 </button>
 
-                                <div className="hidden items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-400 shadow-sm dark:border-white/10 dark:bg-white/5 dark:text-slate-500 lg:flex">
+                                <div className="hidden items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-400 shadow-sm lg:flex dark:border-white/10 dark:bg-white/5 dark:text-slate-500">
                                     <svg
                                         className="h-4 w-4 text-slate-400 dark:text-slate-500"
                                         viewBox="0 0 20 20"
@@ -272,7 +280,7 @@ export function AppLayout({ title, children }: AppLayoutProps) {
                                             strokeLinecap="round"
                                         />
                                     </svg>
-                                    <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-orange-400" />
+                                    <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-orange-400" />
                                 </button>
 
                                 <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-3 py-2 shadow-sm dark:border-white/10 dark:bg-white/5">
