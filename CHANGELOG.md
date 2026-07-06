@@ -1,3 +1,15 @@
+# [0.6.0](https://github.com/Andi-IM/inventory-monitoring/compare/v0.5.0...v0.6.0) (2026-07-06)
+
+
+### Bug Fixes
+
+* implement global dark mode toggle and transition ([05a0506](https://github.com/Andi-IM/inventory-monitoring/commit/05a0506011ef1f3f9951cba7e9582350cbd2d3b6))
+
+
+### Features
+
+* adopt TailAdmin design system and decouple modules ([0e408bb](https://github.com/Andi-IM/inventory-monitoring/commit/0e408bb7304c7c5dd51fb9378e69382ca0d57499))
+
 # [0.5.0](https://github.com/Andi-IM/inventory-monitoring/compare/v0.4.0...v0.5.0) (2026-07-05)
 
 
