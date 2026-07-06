@@ -157,3 +157,12 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      - name: Clean up old GHCR images
+        uses: dataaxiom/ghcr-cleanup-action@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          # The package name is usually the repository name without the owner
+          packages: inventory-monitoring
+          keep-n-tagged: 5
+          keep-n-untagged: 0
