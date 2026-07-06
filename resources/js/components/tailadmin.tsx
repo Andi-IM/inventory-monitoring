@@ -110,7 +110,7 @@ export function Modal({
 
         if (modalRef.current) {
             const focusableElements = modalRef.current.querySelectorAll(
-                'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+                'button:not(:disabled), [href]:not(:disabled), input:not(:disabled), select:not(:disabled), textarea:not(:disabled), [tabindex]:not([tabindex="-1"]):not(:disabled)',
             ) as NodeListOf<HTMLElement>;
 
             if (focusableElements.length > 0) {
@@ -127,7 +127,7 @@ export function Modal({
 
             if (event.key === 'Tab' && modalRef.current) {
                 const focusableElements = modalRef.current.querySelectorAll(
-                    'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+                    'button:not(:disabled), [href]:not(:disabled), input:not(:disabled), select:not(:disabled), textarea:not(:disabled), [tabindex]:not([tabindex="-1"]):not(:disabled)',
                 ) as NodeListOf<HTMLElement>;
 
                 if (focusableElements.length === 0) {
@@ -182,6 +182,7 @@ export function Modal({
         >
             <button
                 type="button"
+                tabIndex={-1}
                 className="fixed inset-0 h-full w-full bg-slate-400/50 backdrop-blur-sm dark:bg-slate-950/70"
                 onClick={onClose}
                 aria-label="Tutup modal"
