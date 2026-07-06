@@ -8,7 +8,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
-use Modules\Access\Models\ExternalBorrower;
 
 /**
  * @property Carbon $due_at
@@ -43,14 +42,6 @@ class Loan extends Model
     public function borrowerUser(): BelongsTo
     {
         return $this->belongsTo(User::class, 'borrower_user_id');
-    }
-
-    /**
-     * @return BelongsTo<ExternalBorrower, $this>
-     */
-    public function externalBorrower(): BelongsTo
-    {
-        return $this->belongsTo(ExternalBorrower::class);
     }
 
     /**

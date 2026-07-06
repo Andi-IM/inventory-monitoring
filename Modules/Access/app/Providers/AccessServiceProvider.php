@@ -3,6 +3,8 @@
 namespace Modules\Access\Providers;
 
 use Illuminate\Console\Scheduling\Schedule;
+use Modules\Access\Contracts\AccessClientInterface;
+use Modules\Access\Services\AccessClientService;
 use Nwidart\Modules\Support\ModuleServiceProvider;
 
 class AccessServiceProvider extends ModuleServiceProvider
@@ -43,4 +45,17 @@ class AccessServiceProvider extends ModuleServiceProvider
     // {
     //     $schedule->command('inspire')->hourly();
     // }
+
+    /**
+     * Register any application services.
+     */
+    public function register(): void
+    {
+        parent::register();
+
+        $this->app->bind(
+            AccessClientInterface::class,
+            AccessClientService::class
+        );
+    }
 }

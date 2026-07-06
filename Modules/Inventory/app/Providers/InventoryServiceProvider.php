@@ -2,6 +2,8 @@
 
 namespace Modules\Inventory\Providers;
 
+use Modules\Inventory\Contracts\InventoryClientInterface;
+use Modules\Inventory\Services\InventoryClientService;
 use Nwidart\Modules\Support\ModuleServiceProvider;
 
 class InventoryServiceProvider extends ModuleServiceProvider
@@ -24,4 +26,17 @@ class InventoryServiceProvider extends ModuleServiceProvider
     protected array $providers = [
         RouteServiceProvider::class,
     ];
+
+    /**
+     * Register any application services.
+     */
+    public function register(): void
+    {
+        parent::register();
+
+        $this->app->bind(
+            InventoryClientInterface::class,
+            InventoryClientService::class
+        );
+    }
 }

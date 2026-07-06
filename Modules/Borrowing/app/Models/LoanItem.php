@@ -6,7 +6,6 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
-use Modules\Inventory\Models\ItemUnit;
 
 /**
  * @property int $loan_id
@@ -34,13 +33,5 @@ class LoanItem extends Model
     public function loan(): BelongsTo
     {
         return $this->belongsTo(Loan::class);
-    }
-
-    /**
-     * @return BelongsTo<ItemUnit, $this>
-     */
-    public function itemUnit(): BelongsTo
-    {
-        return $this->belongsTo(ItemUnit::class);
     }
 }
