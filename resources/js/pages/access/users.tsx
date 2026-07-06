@@ -1,5 +1,18 @@
 import { Form } from '@inertiajs/react';
 import { AppLayout } from '@/components/app-layout';
+import {
+    DangerButton,
+    EmptyState,
+    Field,
+    Input,
+    RowValue,
+    SectionHeader,
+    Select,
+    SubmitButton,
+    Surface,
+    SurfaceBody,
+    TableShell,
+} from '@/components/tailadmin';
 import { destroy, store } from '@/routes/access/users';
 
 type Group = { id: number; name: string };
@@ -22,102 +35,103 @@ export default function Users({
 }) {
     return (
         <AppLayout title="User">
-            <Form
-                {...store.form()}
-                resetOnSuccess
-                className="grid gap-3 rounded-lg border border-zinc-200 bg-white p-4 md:grid-cols-6 dark:border-zinc-800 dark:bg-zinc-900"
+            <Surface>
+                <SurfaceBody className="space-y-6">
+                    <SectionHeader
+                        eyebrow="Access"
+                        title="User management"
+                        description="Kelola akun internal, role, dan grup akses dari satu layar."
+                    />
+
+                    <Form
+                        {...store.form()}
+                        resetOnSuccess
+                        className="grid gap-4 md:grid-cols-2 xl:grid-cols-3"
+                    >
+                        <Field label="Nama" hint="Wajib">
+                            <Input name="name" placeholder="Nama pengguna" />
+                        </Field>
+                        <Field label="Email" hint="Login email">
+                            <Input
+                                name="email"
+                                type="email"
+                                placeholder="nama@contoh.com"
+                            />
+                        </Field>
+                        <Field label="Kata sandi" hint="Buat rahasia baru">
+                            <Input
+                                name="password"
+                                type="password"
+                                placeholder="Password"
+                            />
+                        </Field>
+                        <Field label="Role">
+                            <Select name="role" defaultValue={roles[0]}>
+                                {roles.map((role) => (
+                                    <option key={role} value={role}>
+                                        {role}
+                                    </option>
+                                ))}
+                            </Select>
+                        </Field>
+                        <Field label="Grup" hint="Bisa lebih dari satu">
+                            <Select
+                                name="group_ids[]"
+                                multiple
+                                className="min-h-32"
+                            >
+                                {groups.map((group) => (
+                                    <option key={group.id} value={group.id}>
+                                        {group.name}
+                                    </option>
+                                ))}
+                            </Select>
+                        </Field>
+                        <div className="flex items-end md:col-span-2 xl:col-span-3">
+                            <SubmitButton className="w-full sm:w-auto">
+                                Tambah User
+                            </SubmitButton>
+                        </div>
+                    </Form>
+                </SurfaceBody>
+            </Surface>
+
+            <TableShell
+                headers={['Nama', 'Email', 'Role', 'Grup', '']}
+                emptyState={
+                    users.length === 0 ? (
+                        <EmptyState
+                            title="Belum ada user"
+                            description="Tambahkan user pertama untuk mulai mengelola akses."
+                        />
+                    ) : null
+                }
             >
-                <input
-                    name="name"
-                    placeholder="Nama"
-                    className="rounded-md border border-zinc-300 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-950"
-                />
-                <input
-                    name="email"
-                    type="email"
-                    placeholder="Email"
-                    className="rounded-md border border-zinc-300 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-950"
-                />
-                <input
-                    name="password"
-                    type="password"
-                    placeholder="Kata sandi"
-                    className="rounded-md border border-zinc-300 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-950"
-                />
-                <select
-                    name="role"
-                    className="rounded-md border border-zinc-300 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-950"
-                >
-                    {roles.map((role) => (
-                        <option key={role} value={role}>
-                            {role}
-                        </option>
-                    ))}
-                </select>
-                <select
-                    name="group_ids[]"
-                    multiple
-                    className="min-h-10 rounded-md border border-zinc-300 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-950"
-                >
-                    {groups.map((group) => (
-                        <option key={group.id} value={group.id}>
-                            {group.name}
-                        </option>
-                    ))}
-                </select>
-                <button className="rounded-md bg-zinc-950 px-4 py-2 text-white dark:bg-zinc-100 dark:text-zinc-950">
-                    Tambah
-                </button>
-            </Form>
-            <Table headers={['Nama', 'Email', 'Role', 'Grup', '']}>
                 {users.map((user) => (
                     <tr
                         key={user.id}
-                        className="border-t border-zinc-200 dark:border-zinc-800"
+                        className="hover:bg-slate-50/70 dark:hover:bg-white/5"
                     >
-                        <td className="p-3">{user.name}</td>
-                        <td className="p-3">{user.email}</td>
-                        <td className="p-3">{user.role}</td>
-                        <td className="p-3">
+                        <RowValue>
+                            <div className="font-medium text-slate-950 dark:text-white">
+                                {user.name}
+                            </div>
+                        </RowValue>
+                        <RowValue>{user.email}</RowValue>
+                        <RowValue>{user.role}</RowValue>
+                        <RowValue>
                             {user.groups
                                 .map((group) => group.name)
                                 .join(', ') || '-'}
-                        </td>
-                        <td className="p-3 text-right">
+                        </RowValue>
+                        <RowValue align="right">
                             <Form {...destroy.form(user.id)}>
-                                <button className="text-sm text-red-600">
-                                    Hapus
-                                </button>
+                                <DangerButton>Hapus</DangerButton>
                             </Form>
-                        </td>
+                        </RowValue>
                     </tr>
                 ))}
-            </Table>
+            </TableShell>
         </AppLayout>
-    );
-}
-
-function Table({
-    headers,
-    children,
-}: {
-    headers: string[];
-    children: React.ReactNode;
-}) {
-    return (
-        <div className="mt-6 overflow-hidden rounded-lg border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">
-            <table className="w-full text-left text-sm">
-                <thead>
-                    <tr>
-                        {headers.map((header) => (
-                            <th key={header} className="p-3 font-semibold">
-                                {header}
-                            </th>
-                        ))}
-                    </tr>
-                </thead>
-                <tbody>{children}</tbody>
-            </table>
-        </div>
     );
 }
