@@ -1,5 +1,17 @@
 import { Form } from '@inertiajs/react';
 import { AppLayout } from '@/components/app-layout';
+import {
+    EmptyState,
+    Field,
+    Input,
+    RowValue,
+    SectionHeader,
+    SubmitButton,
+    Surface,
+    SurfaceBody,
+    TableShell,
+    StatusBadge,
+} from '@/components/tailadmin';
 import { destroy, store } from '@/routes/inventory/categories';
 
 type Category = {
@@ -12,69 +24,70 @@ type Category = {
 export default function Categories({ categories }: { categories: Category[] }) {
     return (
         <AppLayout title="Kategori Alat">
-            <Form
-                {...store.form()}
-                resetOnSuccess
-                className="grid gap-3 rounded-lg border border-zinc-200 bg-white p-4 md:grid-cols-3 dark:border-zinc-800 dark:bg-zinc-900"
-            >
-                <input
-                    name="name"
-                    placeholder="Nama kategori"
-                    className="rounded-md border border-zinc-300 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-950"
-                />
-                <input
-                    name="code"
-                    placeholder="Kode"
-                    className="rounded-md border border-zinc-300 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-950"
-                />
-                <button className="rounded-md bg-zinc-950 px-4 py-2 text-white dark:bg-zinc-100 dark:text-zinc-950">
-                    Tambah
-                </button>
-            </Form>
-            <Table headers={['Nama', 'Kode', 'Jumlah alat', '']}>
-                {categories.map((category) => (
-                    <tr
-                        key={category.id}
-                        className="border-t border-zinc-200 dark:border-zinc-800"
+            <Surface>
+                <SurfaceBody className="space-y-6">
+                    <SectionHeader
+                        eyebrow="Inventory"
+                        title="Category library"
+                        description="Kelola kategori alat dengan identitas kode yang jelas."
+                    />
+
+                    <Form
+                        {...store.form()}
+                        resetOnSuccess
+                        className="grid gap-4 md:grid-cols-2"
                     >
-                        <td className="p-3">{category.name}</td>
-                        <td className="p-3">{category.code ?? '-'}</td>
-                        <td className="p-3">{category.items_count}</td>
-                        <td className="p-3 text-right">
+                        <Field label="Nama kategori">
+                            <Input name="name" placeholder="Nama kategori" />
+                        </Field>
+                        <Field label="Kode" hint="Opsional">
+                            <Input name="code" placeholder="Kode kategori" />
+                        </Field>
+                        <div className="flex items-end md:col-span-2">
+                            <SubmitButton className="w-full sm:w-auto">
+                                Tambah Kategori
+                            </SubmitButton>
+                        </div>
+                    </Form>
+                </SurfaceBody>
+            </Surface>
+
+            <TableShell
+                headers={['Nama', 'Kode', 'Jumlah alat', '']}
+                emptyState={
+                    categories.length === 0 ? (
+                        <EmptyState
+                            title="Belum ada kategori"
+                            description="Mulai dari kategori pertama untuk mengelola item dan unit."
+                        />
+                    ) : null
+                }
+            >
+                {categories.map((category) => (
+                    <tr key={category.id} className="hover:bg-slate-50/70 dark:hover:bg-white/5">
+                        <RowValue>
+                            <div className="font-medium text-slate-950 dark:text-white">
+                                {category.name}
+                            </div>
+                        </RowValue>
+                        <RowValue>
+                            {category.code ? (
+                                <StatusBadge tone="info">{category.code}</StatusBadge>
+                            ) : (
+                                '-'
+                            )}
+                        </RowValue>
+                        <RowValue>{category.items_count}</RowValue>
+                        <RowValue align="right">
                             <Form {...destroy.form(category.id)}>
-                                <button className="text-sm text-red-600">
+                                <button className="rounded-full border border-rose-200 px-3 py-1 text-xs font-semibold text-rose-600 transition hover:bg-rose-50 hover:text-rose-500">
                                     Hapus
                                 </button>
                             </Form>
-                        </td>
+                        </RowValue>
                     </tr>
                 ))}
-            </Table>
+            </TableShell>
         </AppLayout>
-    );
-}
-
-function Table({
-    headers,
-    children,
-}: {
-    headers: string[];
-    children: React.ReactNode;
-}) {
-    return (
-        <div className="mt-6 overflow-hidden rounded-lg border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">
-            <table className="w-full text-left text-sm">
-                <thead>
-                    <tr>
-                        {headers.map((header) => (
-                            <th key={header} className="p-3 font-semibold">
-                                {header}
-                            </th>
-                        ))}
-                    </tr>
-                </thead>
-                <tbody>{children}</tbody>
-            </table>
-        </div>
     );
 }

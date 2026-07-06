@@ -1,5 +1,17 @@
 import { Form } from '@inertiajs/react';
 import { AppLayout } from '@/components/app-layout';
+import {
+    EmptyState,
+    Field,
+    Input,
+    RowValue,
+    SectionHeader,
+    Select,
+    SubmitButton,
+    Surface,
+    SurfaceBody,
+    TableShell,
+} from '@/components/tailadmin';
 import { destroy, store } from '@/routes/inventory/items';
 
 type Category = { id: number; name: string };
@@ -20,81 +32,75 @@ export default function Items({
 }) {
     return (
         <AppLayout title="Master Alat">
-            <Form
-                {...store.form()}
-                resetOnSuccess
-                className="grid gap-3 rounded-lg border border-zinc-200 bg-white p-4 md:grid-cols-4 dark:border-zinc-800 dark:bg-zinc-900"
-            >
-                <select
-                    name="category_id"
-                    className="rounded-md border border-zinc-300 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-950"
-                >
-                    <option value="">Kategori</option>
-                    {categories.map((category) => (
-                        <option key={category.id} value={category.id}>
-                            {category.name}
-                        </option>
-                    ))}
-                </select>
-                <input
-                    name="name"
-                    placeholder="Nama alat"
-                    className="rounded-md border border-zinc-300 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-950"
-                />
-                <input
-                    name="description"
-                    placeholder="Deskripsi"
-                    className="rounded-md border border-zinc-300 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-950"
-                />
-                <button className="rounded-md bg-zinc-950 px-4 py-2 text-white dark:bg-zinc-100 dark:text-zinc-950">
-                    Tambah
-                </button>
-            </Form>
-            <Table headers={['Nama', 'Kategori', 'Unit', 'Deskripsi', '']}>
-                {items.map((item) => (
-                    <tr
-                        key={item.id}
-                        className="border-t border-zinc-200 dark:border-zinc-800"
+            <Surface>
+                <SurfaceBody className="space-y-6">
+                    <SectionHeader
+                        eyebrow="Inventory"
+                        title="Master items"
+                        description="Rangkum alat berdasarkan kategori agar unit lebih mudah dipetakan."
+                    />
+
+                    <Form
+                        {...store.form()}
+                        resetOnSuccess
+                        className="grid gap-4 md:grid-cols-2 xl:grid-cols-3"
                     >
-                        <td className="p-3">{item.name}</td>
-                        <td className="p-3">{item.category.name}</td>
-                        <td className="p-3">{item.units_count}</td>
-                        <td className="p-3">{item.description ?? '-'}</td>
-                        <td className="p-3 text-right">
+                        <Field label="Kategori">
+                            <Select name="category_id" defaultValue="">
+                                <option value="">Pilih kategori</option>
+                                {categories.map((category) => (
+                                    <option key={category.id} value={category.id}>
+                                        {category.name}
+                                    </option>
+                                ))}
+                            </Select>
+                        </Field>
+                        <Field label="Nama alat">
+                            <Input name="name" placeholder="Nama alat" />
+                        </Field>
+                        <Field label="Deskripsi" hint="Opsional">
+                            <Input name="description" placeholder="Deskripsi singkat" />
+                        </Field>
+                        <div className="flex items-end md:col-span-2 xl:col-span-3">
+                            <SubmitButton className="w-full sm:w-auto">
+                                Tambah Item
+                            </SubmitButton>
+                        </div>
+                    </Form>
+                </SurfaceBody>
+            </Surface>
+
+            <TableShell
+                headers={['Nama', 'Kategori', 'Unit', 'Deskripsi', '']}
+                emptyState={
+                    items.length === 0 ? (
+                        <EmptyState
+                            title="Belum ada item"
+                            description="Buat item pertama untuk mulai mengisi unit alat."
+                        />
+                    ) : null
+                }
+            >
+                {items.map((item) => (
+                    <tr key={item.id} className="hover:bg-slate-50/70 dark:hover:bg-white/5">
+                        <RowValue>
+                            <div className="font-medium text-slate-950 dark:text-white">
+                                {item.name}
+                            </div>
+                        </RowValue>
+                        <RowValue>{item.category.name}</RowValue>
+                        <RowValue>{item.units_count}</RowValue>
+                        <RowValue>{item.description ?? '-'}</RowValue>
+                        <RowValue align="right">
                             <Form {...destroy.form(item.id)}>
-                                <button className="text-sm text-red-600">
+                                <button className="rounded-full border border-rose-200 px-3 py-1 text-xs font-semibold text-rose-600 transition hover:bg-rose-50 hover:text-rose-500">
                                     Hapus
                                 </button>
                             </Form>
-                        </td>
+                        </RowValue>
                     </tr>
                 ))}
-            </Table>
+            </TableShell>
         </AppLayout>
-    );
-}
-
-function Table({
-    headers,
-    children,
-}: {
-    headers: string[];
-    children: React.ReactNode;
-}) {
-    return (
-        <div className="mt-6 overflow-hidden rounded-lg border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">
-            <table className="w-full text-left text-sm">
-                <thead>
-                    <tr>
-                        {headers.map((header) => (
-                            <th key={header} className="p-3 font-semibold">
-                                {header}
-                            </th>
-                        ))}
-                    </tr>
-                </thead>
-                <tbody>{children}</tbody>
-            </table>
-        </div>
     );
 }

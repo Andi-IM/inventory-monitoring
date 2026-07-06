@@ -1,5 +1,18 @@
 import { Form } from '@inertiajs/react';
 import { AppLayout } from '@/components/app-layout';
+import {
+    EmptyState,
+    Field,
+    Input,
+    RowValue,
+    SectionHeader,
+    Select,
+    StatusBadge,
+    SubmitButton,
+    Surface,
+    SurfaceBody,
+    TableShell,
+} from '@/components/tailadmin';
 import { destroy, store } from '@/routes/inventory/item-units';
 
 type Item = { id: number; name: string };
@@ -22,92 +35,88 @@ export default function Units({
 }) {
     return (
         <AppLayout title="Unit Alat">
-            <Form
-                {...store.form()}
-                resetOnSuccess
-                className="grid gap-3 rounded-lg border border-zinc-200 bg-white p-4 md:grid-cols-5 dark:border-zinc-800 dark:bg-zinc-900"
-            >
-                <select
-                    name="item_id"
-                    className="rounded-md border border-zinc-300 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-950"
-                >
-                    <option value="">Alat</option>
-                    {items.map((item) => (
-                        <option key={item.id} value={item.id}>
-                            {item.name}
-                        </option>
-                    ))}
-                </select>
-                <input
-                    name="asset_code"
-                    placeholder="Kode aset"
-                    className="rounded-md border border-zinc-300 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-950"
-                />
-                <input
-                    name="location"
-                    placeholder="Lokasi"
-                    className="rounded-md border border-zinc-300 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-950"
-                />
-                <select
-                    name="status"
-                    defaultValue="available"
-                    className="rounded-md border border-zinc-300 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-950"
-                >
-                    {statuses.map((status) => (
-                        <option key={status} value={status}>
-                            {status}
-                        </option>
-                    ))}
-                </select>
-                <button className="rounded-md bg-zinc-950 px-4 py-2 text-white dark:bg-zinc-100 dark:text-zinc-950">
-                    Tambah
-                </button>
-            </Form>
-            <Table headers={['Kode aset', 'Alat', 'Lokasi', 'Status', '']}>
-                {units.map((unit) => (
-                    <tr
-                        key={unit.id}
-                        className="border-t border-zinc-200 dark:border-zinc-800"
+            <Surface>
+                <SurfaceBody className="space-y-6">
+                    <SectionHeader
+                        eyebrow="Inventory"
+                        title="Unit tracker"
+                        description="Kelola unit aset dengan lokasi dan status yang mudah dipantau."
+                    />
+
+                    <Form
+                        {...store.form()}
+                        resetOnSuccess
+                        className="grid gap-4 md:grid-cols-2 xl:grid-cols-4"
                     >
-                        <td className="p-3">{unit.asset_code}</td>
-                        <td className="p-3">{unit.item.name}</td>
-                        <td className="p-3">{unit.location ?? '-'}</td>
-                        <td className="p-3">{unit.status}</td>
-                        <td className="p-3 text-right">
+                        <Field label="Alat">
+                            <Select name="item_id" defaultValue="">
+                                <option value="">Pilih alat</option>
+                                {items.map((item) => (
+                                    <option key={item.id} value={item.id}>
+                                        {item.name}
+                                    </option>
+                                ))}
+                            </Select>
+                        </Field>
+                        <Field label="Kode aset">
+                            <Input name="asset_code" placeholder="Kode aset" />
+                        </Field>
+                        <Field label="Lokasi" hint="Opsional">
+                            <Input name="location" placeholder="Lokasi penyimpanan" />
+                        </Field>
+                        <Field label="Status">
+                            <Select name="status" defaultValue="available">
+                                {statuses.map((status) => (
+                                    <option key={status} value={status}>
+                                        {status}
+                                    </option>
+                                ))}
+                            </Select>
+                        </Field>
+                        <div className="flex items-end md:col-span-2 xl:col-span-4">
+                            <SubmitButton className="w-full sm:w-auto">
+                                Tambah Unit
+                            </SubmitButton>
+                        </div>
+                    </Form>
+                </SurfaceBody>
+            </Surface>
+
+            <TableShell
+                headers={['Kode aset', 'Alat', 'Lokasi', 'Status', '']}
+                emptyState={
+                    units.length === 0 ? (
+                        <EmptyState
+                            title="Belum ada unit"
+                            description="Tambahkan unit untuk mulai melacak stok."
+                        />
+                    ) : null
+                }
+            >
+                {units.map((unit) => (
+                    <tr key={unit.id} className="hover:bg-slate-50/70 dark:hover:bg-white/5">
+                        <RowValue>
+                            <div className="font-medium text-slate-950 dark:text-white">
+                                {unit.asset_code}
+                            </div>
+                        </RowValue>
+                        <RowValue>{unit.item.name}</RowValue>
+                        <RowValue>{unit.location ?? '-'}</RowValue>
+                        <RowValue>
+                            <StatusBadge tone={unit.status === 'available' ? 'success' : 'warning'}>
+                                {unit.status}
+                            </StatusBadge>
+                        </RowValue>
+                        <RowValue align="right">
                             <Form {...destroy.form(unit.id)}>
-                                <button className="text-sm text-red-600">
+                                <button className="rounded-full border border-rose-200 px-3 py-1 text-xs font-semibold text-rose-600 transition hover:bg-rose-50 hover:text-rose-500">
                                     Hapus
                                 </button>
                             </Form>
-                        </td>
+                        </RowValue>
                     </tr>
                 ))}
-            </Table>
+            </TableShell>
         </AppLayout>
-    );
-}
-
-function Table({
-    headers,
-    children,
-}: {
-    headers: string[];
-    children: React.ReactNode;
-}) {
-    return (
-        <div className="mt-6 overflow-hidden rounded-lg border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">
-            <table className="w-full text-left text-sm">
-                <thead>
-                    <tr>
-                        {headers.map((header) => (
-                            <th key={header} className="p-3 font-semibold">
-                                {header}
-                            </th>
-                        ))}
-                    </tr>
-                </thead>
-                <tbody>{children}</tbody>
-            </table>
-        </div>
     );
 }

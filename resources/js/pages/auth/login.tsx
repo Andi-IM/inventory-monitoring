@@ -1,36 +1,94 @@
-import { Form, Head } from '@inertiajs/react';
+﻿import { Form, Head } from '@inertiajs/react';
 import { store } from '@/actions/Modules/Access/Http/Controllers/AuthController';
+import { Field, Input, SubmitButton } from '@/components/tailadmin';
+
+const features = [
+    ['Access', 'Users, groups, borrowers'],
+    ['Inventory', 'Categories, items, units'],
+    ['Borrowing', 'Loans and returns'],
+];
 
 export default function Login() {
     return (
         <>
             <Head title="Masuk" />
-            <main className="flex min-h-screen items-center justify-center bg-zinc-50 px-4 dark:bg-zinc-950">
-                <section className="w-full max-w-sm rounded-lg border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-                    <h1 className="text-xl font-semibold text-zinc-950 dark:text-zinc-50">
-                        Masuk
-                    </h1>
-                    <Form {...store.form()} className="mt-6 grid gap-4">
-                        <label className="grid gap-1 text-sm font-medium text-zinc-700 dark:text-zinc-200">
-                            Email
-                            <input
-                                name="email"
-                                type="email"
-                                className="rounded-md border border-zinc-300 bg-white px-3 py-2 dark:border-zinc-700 dark:bg-zinc-950"
-                            />
-                        </label>
-                        <label className="grid gap-1 text-sm font-medium text-zinc-700 dark:text-zinc-200">
-                            Kata sandi
-                            <input
-                                name="password"
-                                type="password"
-                                className="rounded-md border border-zinc-300 bg-white px-3 py-2 dark:border-zinc-700 dark:bg-zinc-950"
-                            />
-                        </label>
-                        <button className="rounded-md bg-zinc-950 px-4 py-2 text-sm font-semibold text-white hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-950">
-                            Masuk
-                        </button>
-                    </Form>
+            <main className="flex min-h-screen items-center justify-center bg-slate-50 px-4 py-10">
+                <section className="grid w-full max-w-6xl overflow-hidden rounded-[32px] border border-slate-200 bg-white shadow-[0_20px_60px_rgba(15,23,42,0.08)] lg:grid-cols-[1.05fr_0.95fr]">
+                    <div className="flex flex-col justify-between bg-slate-950 px-8 py-10 text-white sm:px-10 lg:px-12">
+                        <div>
+                            <div className="flex items-center gap-3">
+                                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-500 text-white">
+                                    <span className="text-sm font-black tracking-[0.2em]">IM</span>
+                                </div>
+                                <div>
+                                    <p className="text-xs font-semibold uppercase tracking-[0.35em] text-cyan-300">
+                                        TailAdmin
+                                    </p>
+                                    <h1 className="mt-1 text-2xl font-semibold">
+                                        Inventory Monitor
+                                    </h1>
+                                </div>
+                            </div>
+
+                            <h2 className="mt-10 max-w-md text-4xl font-semibold leading-tight">
+                                Inventaris dan peminjaman dalam satu dashboard yang rapi.
+                            </h2>
+                            <p className="mt-4 max-w-md text-sm leading-6 text-slate-300">
+                                Struktur halaman mengikuti pola TailAdmin: panel kiri untuk
+                                konteks, panel kanan untuk form utama.
+                            </p>
+                        </div>
+
+                        <div className="mt-10 grid gap-3 sm:grid-cols-3">
+                            {features.map(([title, description]) => (
+                                <div
+                                    key={title}
+                                    className="rounded-2xl border border-white/10 bg-white/5 p-4"
+                                >
+                                    <p className="text-sm font-semibold text-white">
+                                        {title}
+                                    </p>
+                                    <p className="mt-1 text-xs leading-5 text-slate-400">
+                                        {description}
+                                    </p>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div className="flex items-center justify-center px-6 py-10 sm:px-10">
+                        <div className="w-full max-w-md">
+                            <div className="mb-8">
+                                <p className="text-xs font-semibold uppercase tracking-[0.35em] text-cyan-600">
+                                    Welcome back
+                                </p>
+                                <h2 className="mt-2 text-3xl font-semibold text-slate-950">
+                                    Masuk ke dashboard
+                                </h2>
+                                <p className="mt-2 text-sm text-slate-500">
+                                    Gunakan akun admin atau petugas untuk lanjut.
+                                </p>
+                            </div>
+
+                            <Form {...store.form()} className="grid gap-4">
+                                <Field label="Email">
+                                    <Input
+                                        name="email"
+                                        type="email"
+                                        placeholder="nama@contoh.com"
+                                    />
+                                </Field>
+                                <Field label="Kata sandi">
+                                    <Input
+                                        name="password"
+                                        type="password"
+                                        placeholder="Password"
+                                    />
+                                </Field>
+                                <SubmitButton className="mt-2 w-full">Masuk</SubmitButton>
+                            </Form>
+                        </div>
+                    </div>
                 </section>
             </main>
         </>

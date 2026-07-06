@@ -1,5 +1,17 @@
 import { Form } from '@inertiajs/react';
 import { AppLayout } from '@/components/app-layout';
+import {
+    EmptyState,
+    Field,
+    Input,
+    RowValue,
+    SectionHeader,
+    Select,
+    SubmitButton,
+    Surface,
+    SurfaceBody,
+    TableShell,
+} from '@/components/tailadmin';
 import { destroy, store } from '@/routes/access/groups';
 
 type Group = {
@@ -20,83 +32,75 @@ export default function Groups({
 }) {
     return (
         <AppLayout title="Grup">
-            <Form
-                {...store.form()}
-                resetOnSuccess
-                className="grid gap-3 rounded-lg border border-zinc-200 bg-white p-4 md:grid-cols-4 dark:border-zinc-800 dark:bg-zinc-900"
-            >
-                <input
-                    name="name"
-                    placeholder="Nama grup"
-                    className="rounded-md border border-zinc-300 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-950"
-                />
-                <select
-                    name="type"
-                    className="rounded-md border border-zinc-300 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-950"
-                >
-                    <option value="">Tipe</option>
-                    {types.map((type) => (
-                        <option key={type} value={type}>
-                            {type}
-                        </option>
-                    ))}
-                </select>
-                <input
-                    name="description"
-                    placeholder="Deskripsi"
-                    className="rounded-md border border-zinc-300 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-950"
-                />
-                <button className="rounded-md bg-zinc-950 px-4 py-2 text-white dark:bg-zinc-100 dark:text-zinc-950">
-                    Tambah
-                </button>
-            </Form>
-            <Table headers={['Nama', 'Tipe', 'User', 'Eksternal', '']}>
-                {groups.map((group) => (
-                    <tr
-                        key={group.id}
-                        className="border-t border-zinc-200 dark:border-zinc-800"
+            <Surface>
+                <SurfaceBody className="space-y-6">
+                    <SectionHeader
+                        eyebrow="Access"
+                        title="Group registry"
+                        description="Definisikan grup untuk otorisasi user dan peminjam eksternal."
+                    />
+
+                    <Form
+                        {...store.form()}
+                        resetOnSuccess
+                        className="grid gap-4 md:grid-cols-2 xl:grid-cols-3"
                     >
-                        <td className="p-3">{group.name}</td>
-                        <td className="p-3">{group.type ?? '-'}</td>
-                        <td className="p-3">{group.users_count}</td>
-                        <td className="p-3">
-                            {group.external_borrowers_count}
-                        </td>
-                        <td className="p-3 text-right">
+                        <Field label="Nama grup">
+                            <Input name="name" placeholder="Nama grup" />
+                        </Field>
+                        <Field label="Tipe">
+                            <Select name="type" defaultValue="">
+                                <option value="">Pilih tipe</option>
+                                {types.map((type) => (
+                                    <option key={type} value={type}>
+                                        {type}
+                                    </option>
+                                ))}
+                            </Select>
+                        </Field>
+                        <Field label="Deskripsi" hint="Opsional">
+                            <Input name="description" placeholder="Deskripsi singkat" />
+                        </Field>
+                        <div className="flex items-end md:col-span-2 xl:col-span-3">
+                            <SubmitButton className="w-full sm:w-auto">
+                                Tambah Grup
+                            </SubmitButton>
+                        </div>
+                    </Form>
+                </SurfaceBody>
+            </Surface>
+
+            <TableShell
+                headers={['Nama', 'Tipe', 'User', 'Eksternal', '']}
+                emptyState={
+                    groups.length === 0 ? (
+                        <EmptyState
+                            title="Belum ada grup"
+                            description="Buat grup pertama untuk mulai menyusun otorisasi."
+                        />
+                    ) : null
+                }
+            >
+                {groups.map((group) => (
+                    <tr key={group.id} className="hover:bg-slate-50/70 dark:hover:bg-white/5">
+                        <RowValue>
+                            <div className="font-medium text-slate-950 dark:text-white">
+                                {group.name}
+                            </div>
+                        </RowValue>
+                        <RowValue>{group.type ?? '-'}</RowValue>
+                        <RowValue>{group.users_count}</RowValue>
+                        <RowValue>{group.external_borrowers_count}</RowValue>
+                        <RowValue align="right">
                             <Form {...destroy.form(group.id)}>
-                                <button className="text-sm text-red-600">
+                                <button className="rounded-full border border-rose-200 px-3 py-1 text-xs font-semibold text-rose-600 transition hover:bg-rose-50 hover:text-rose-500">
                                     Hapus
                                 </button>
                             </Form>
-                        </td>
+                        </RowValue>
                     </tr>
                 ))}
-            </Table>
+            </TableShell>
         </AppLayout>
-    );
-}
-
-function Table({
-    headers,
-    children,
-}: {
-    headers: string[];
-    children: React.ReactNode;
-}) {
-    return (
-        <div className="mt-6 overflow-hidden rounded-lg border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">
-            <table className="w-full text-left text-sm">
-                <thead>
-                    <tr>
-                        {headers.map((header) => (
-                            <th key={header} className="p-3 font-semibold">
-                                {header}
-                            </th>
-                        ))}
-                    </tr>
-                </thead>
-                <tbody>{children}</tbody>
-            </table>
-        </div>
     );
 }
