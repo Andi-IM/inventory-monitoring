@@ -104,7 +104,7 @@ export function AppLayout({ title, children }: AppLayoutProps) {
     return (
         <>
             <Head title={title} />
-            <div className="flex h-screen overflow-hidden bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
+            <div className="flex h-screen overflow-hidden">
                 <div
                     className={`fixed inset-0 z-40 bg-slate-900/30 transition-opacity lg:hidden dark:bg-slate-950/50 ${
                         sidebarOpen

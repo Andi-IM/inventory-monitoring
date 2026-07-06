@@ -1,4 +1,4 @@
-﻿import { Form, Head } from '@inertiajs/react';
+import { Form, Head } from '@inertiajs/react';
 import { store } from '@/actions/Modules/Access/Http/Controllers/AuthController';
 import { Field, Input, SubmitButton } from '@/components/tailadmin';
 
@@ -12,8 +12,8 @@ export default function Login() {
     return (
         <>
             <Head title="Masuk" />
-            <main className="flex min-h-screen items-center justify-center bg-slate-50 px-4 py-10">
-                <section className="grid w-full max-w-6xl overflow-hidden rounded-[32px] border border-slate-200 bg-white shadow-[0_20px_60px_rgba(15,23,42,0.08)] lg:grid-cols-[1.05fr_0.95fr]">
+            <main className="flex min-h-screen items-center justify-center px-4 py-10">
+                <section className="grid w-full max-w-6xl overflow-hidden rounded-[32px] border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 shadow-[0_20px_60px_rgba(15,23,42,0.08)] lg:grid-cols-[1.05fr_0.95fr]">
                     <div className="flex flex-col justify-between bg-slate-950 px-8 py-10 text-white sm:px-10 lg:px-12">
                         <div>
                             <div className="flex items-center gap-3">
@@ -62,10 +62,10 @@ export default function Login() {
                                 <p className="text-xs font-semibold uppercase tracking-[0.35em] text-cyan-600">
                                     Welcome back
                                 </p>
-                                <h2 className="mt-2 text-3xl font-semibold text-slate-950">
+                                <h2 className="mt-2 text-3xl font-semibold text-slate-950 dark:text-white">
                                     Masuk ke dashboard
                                 </h2>
-                                <p className="mt-2 text-sm text-slate-500">
+                                <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
                                     Gunakan akun admin atau petugas untuk lanjut.
                                 </p>
                             </div>

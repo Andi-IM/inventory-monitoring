@@ -15,8 +15,21 @@
         <x-inertia::head>
             <title>{{ config('app.name', 'Laravel') }}</title>
         </x-inertia::head>
+        <script>
+            (function() {
+                try {
+                    var storedTheme = window.localStorage.getItem('inventory-monitoring-theme');
+                    var preferDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                    if (storedTheme === 'dark' || (!storedTheme && preferDark)) {
+                        document.documentElement.classList.add('dark');
+                    } else {
+                        document.documentElement.classList.remove('dark');
+                    }
+                } catch (e) {}
+            })();
+        </script>
     </head>
-    <body class="font-sans antialiased">
+    <body class="font-sans antialiased bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
         <x-inertia::app />
     </body>
 </html>
