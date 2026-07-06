@@ -1,6 +1,7 @@
 import { Form } from '@inertiajs/react';
 import { AppLayout } from '@/components/app-layout';
 import {
+    DangerButton,
     EmptyState,
     Field,
     Input,
@@ -62,7 +63,10 @@ export default function Units({
                             <Input name="asset_code" placeholder="Kode aset" />
                         </Field>
                         <Field label="Lokasi" hint="Opsional">
-                            <Input name="location" placeholder="Lokasi penyimpanan" />
+                            <Input
+                                name="location"
+                                placeholder="Lokasi penyimpanan"
+                            />
                         </Field>
                         <Field label="Status">
                             <Select name="status" defaultValue="available">
@@ -94,7 +98,10 @@ export default function Units({
                 }
             >
                 {units.map((unit) => (
-                    <tr key={unit.id} className="hover:bg-slate-50/70 dark:hover:bg-white/5">
+                    <tr
+                        key={unit.id}
+                        className="hover:bg-slate-50/70 dark:hover:bg-white/5"
+                    >
                         <RowValue>
                             <div className="font-medium text-slate-950 dark:text-white">
                                 {unit.asset_code}
@@ -103,15 +110,19 @@ export default function Units({
                         <RowValue>{unit.item.name}</RowValue>
                         <RowValue>{unit.location ?? '-'}</RowValue>
                         <RowValue>
-                            <StatusBadge tone={unit.status === 'available' ? 'success' : 'warning'}>
+                            <StatusBadge
+                                tone={
+                                    unit.status === 'available'
+                                        ? 'success'
+                                        : 'warning'
+                                }
+                            >
                                 {unit.status}
                             </StatusBadge>
                         </RowValue>
                         <RowValue align="right">
                             <Form {...destroy.form(unit.id)}>
-                                <button className="rounded-full border border-rose-200 px-3 py-1 text-xs font-semibold text-rose-600 transition hover:bg-rose-50 hover:text-rose-500">
-                                    Hapus
-                                </button>
+                                <DangerButton>Hapus</DangerButton>
                             </Form>
                         </RowValue>
                     </tr>

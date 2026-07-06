@@ -1,6 +1,7 @@
 import { Form } from '@inertiajs/react';
 import { AppLayout } from '@/components/app-layout';
 import {
+    DangerButton,
     EmptyState,
     Field,
     Input,
@@ -49,7 +50,10 @@ export default function Items({
                             <Select name="category_id" defaultValue="">
                                 <option value="">Pilih kategori</option>
                                 {categories.map((category) => (
-                                    <option key={category.id} value={category.id}>
+                                    <option
+                                        key={category.id}
+                                        value={category.id}
+                                    >
                                         {category.name}
                                     </option>
                                 ))}
@@ -59,7 +63,10 @@ export default function Items({
                             <Input name="name" placeholder="Nama alat" />
                         </Field>
                         <Field label="Deskripsi" hint="Opsional">
-                            <Input name="description" placeholder="Deskripsi singkat" />
+                            <Input
+                                name="description"
+                                placeholder="Deskripsi singkat"
+                            />
                         </Field>
                         <div className="flex items-end md:col-span-2 xl:col-span-3">
                             <SubmitButton className="w-full sm:w-auto">
@@ -82,7 +89,10 @@ export default function Items({
                 }
             >
                 {items.map((item) => (
-                    <tr key={item.id} className="hover:bg-slate-50/70 dark:hover:bg-white/5">
+                    <tr
+                        key={item.id}
+                        className="hover:bg-slate-50/70 dark:hover:bg-white/5"
+                    >
                         <RowValue>
                             <div className="font-medium text-slate-950 dark:text-white">
                                 {item.name}
@@ -93,9 +103,7 @@ export default function Items({
                         <RowValue>{item.description ?? '-'}</RowValue>
                         <RowValue align="right">
                             <Form {...destroy.form(item.id)}>
-                                <button className="rounded-full border border-rose-200 px-3 py-1 text-xs font-semibold text-rose-600 transition hover:bg-rose-50 hover:text-rose-500">
-                                    Hapus
-                                </button>
+                                <DangerButton>Hapus</DangerButton>
                             </Form>
                         </RowValue>
                     </tr>

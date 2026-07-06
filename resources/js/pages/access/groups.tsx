@@ -1,6 +1,7 @@
 import { Form } from '@inertiajs/react';
 import { AppLayout } from '@/components/app-layout';
 import {
+    DangerButton,
     EmptyState,
     Field,
     Input,
@@ -59,7 +60,10 @@ export default function Groups({
                             </Select>
                         </Field>
                         <Field label="Deskripsi" hint="Opsional">
-                            <Input name="description" placeholder="Deskripsi singkat" />
+                            <Input
+                                name="description"
+                                placeholder="Deskripsi singkat"
+                            />
                         </Field>
                         <div className="flex items-end md:col-span-2 xl:col-span-3">
                             <SubmitButton className="w-full sm:w-auto">
@@ -82,7 +86,10 @@ export default function Groups({
                 }
             >
                 {groups.map((group) => (
-                    <tr key={group.id} className="hover:bg-slate-50/70 dark:hover:bg-white/5">
+                    <tr
+                        key={group.id}
+                        className="hover:bg-slate-50/70 dark:hover:bg-white/5"
+                    >
                         <RowValue>
                             <div className="font-medium text-slate-950 dark:text-white">
                                 {group.name}
@@ -93,9 +100,7 @@ export default function Groups({
                         <RowValue>{group.external_borrowers_count}</RowValue>
                         <RowValue align="right">
                             <Form {...destroy.form(group.id)}>
-                                <button className="rounded-full border border-rose-200 px-3 py-1 text-xs font-semibold text-rose-600 transition hover:bg-rose-50 hover:text-rose-500">
-                                    Hapus
-                                </button>
+                                <DangerButton>Hapus</DangerButton>
                             </Form>
                         </RowValue>
                     </tr>

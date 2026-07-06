@@ -1,5 +1,12 @@
 ﻿import { AppLayout } from '@/components/app-layout';
 
+import {
+    SectionHeader,
+    StatusBadge,
+    Surface,
+    SurfaceBody,
+} from '@/components/tailadmin';
+
 type DashboardProps = {
     stats: Record<
         | 'total_units'
@@ -11,267 +18,446 @@ type DashboardProps = {
     >;
 };
 
-type MetricCard = {
+type StatCard = {
     label: string;
     value: number;
-    trend: string;
-    trendTone: 'success' | 'danger';
-    icon: string;
+    tone: 'success' | 'warning' | 'danger' | 'info';
+    detail: string;
 };
 
-const monthlyLabels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-const monthlySales = [160, 380, 190, 290, 180, 190, 280, 110, 210, 390, 270, 120];
-const areaPrimary = [180, 190, 175, 165, 160, 170, 165, 170, 200, 220, 240, 235];
-const areaSecondary = [40, 32, 50, 42, 55, 43, 68, 100, 110, 120, 150, 140];
+const weeklyBorrowing = [7, 11, 9, 15, 13, 16, 12];
+const weeklyReturns = [4, 7, 6, 8, 10, 9, 11];
+const weeklyLabels = ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'];
 
 export default function Dashboard({ stats }: DashboardProps) {
-    const metrics: MetricCard[] = [
+    return <DashboardOverview stats={stats} />;
+}
+
+function DashboardOverview({ stats }: DashboardProps) {
+    const totalTracked = Math.max(stats.total_units, 1);
+    const availableRate = Math.round(
+        (stats.available_units / totalTracked) * 100,
+    );
+    const utilization = Math.round((stats.borrowed_units / totalTracked) * 100);
+    const overdueRate = Math.round(
+        (stats.overdue_loans / Math.max(stats.active_loans || 1, 1)) * 100,
+    );
+
+    const statCards: StatCard[] = [
         {
-            label: 'Total units',
+            label: 'Total unit',
             value: stats.total_units,
-            trend: '+11.01%',
-            trendTone: 'success',
-            icon: 'users',
+            tone: 'info',
+            detail: 'Seluruh unit yang tercatat dalam inventaris.',
         },
         {
-            label: 'Available units',
+            label: 'Unit tersedia',
             value: stats.available_units,
-            trend: '-9.05%',
-            trendTone: 'danger',
-            icon: 'box',
+            tone: 'success',
+            detail: `${availableRate}% siap dipinjam tanpa proses tambahan.`,
+        },
+        {
+            label: 'Unit dipinjam',
+            value: stats.borrowed_units,
+            tone: 'warning',
+            detail: `${utilization}% inventaris sedang berada di transaksi aktif.`,
+        },
+        {
+            label: 'Pinjaman aktif',
+            value: stats.active_loans,
+            tone: stats.overdue_loans > 0 ? 'danger' : 'info',
+            detail: `${overdueRate}% dari pinjaman aktif melewati jatuh tempo.`,
         },
     ];
 
-    const summary = [
-        ['Target', '$20K', 'down'],
-        ['Revenue', '$20K', 'up'],
-        ['Today', '$20K', 'up'],
+    const stockPressure = [
+        ['Available', stats.available_units, 'success'],
+        ['Borrowed', stats.borrowed_units, 'info'],
+        ['Overdue loans', stats.overdue_loans, 'danger'],
     ] as const;
 
     return (
         <AppLayout title="Dashboard">
-            <div className="grid gap-6 xl:grid-cols-12">
-                <div className="space-y-6 xl:col-span-7">
-                    <div className="grid gap-4 sm:grid-cols-2">
-                        {metrics.map((metric) => (
-                            <section
-                                key={metric.label}
-                                className="rounded-[24px] border border-slate-200 bg-white p-6 shadow-[0_10px_30px_rgba(15,23,42,0.04)]"
-                            >
-                                <div className="flex items-start justify-between gap-3">
-                                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 text-slate-600">
-                                        <MetricIcon name={metric.icon} />
-                                    </div>
-                                    <span
-                                        className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
-                                            metric.trendTone === 'success'
-                                                ? 'bg-emerald-50 text-emerald-600'
-                                                : 'bg-rose-50 text-rose-600'
-                                        }`}
-                                    >
-                                        {metric.trendTone === 'success' ? '↑' : '↓'} {metric.trend}
-                                    </span>
-                                </div>
-                                <p className="mt-6 text-sm text-slate-500">{metric.label}</p>
-                                <p className="mt-2 text-3xl font-semibold tracking-tight text-slate-950">
-                                    {metric.value.toLocaleString('en-US')}
-                                </p>
-                            </section>
-                        ))}
-                    </div>
+            <div className="space-y-6">
+                <Surface>
+                    <SurfaceBody className="space-y-6">
+                        <SectionHeader
+                            eyebrow="Dashboard"
+                            title="Inventory control center"
+                            description="Ringkasan operasional inventaris, peminjaman, dan status yang perlu perhatian."
+                            action={
+                                <StatusBadge
+                                    tone={
+                                        stats.overdue_loans > 0
+                                            ? 'danger'
+                                            : 'success'
+                                    }
+                                >
+                                    {stats.overdue_loans > 0
+                                        ? 'Needs review'
+                                        : 'Healthy'}
+                                </StatusBadge>
+                            }
+                        />
 
-                    <section className="rounded-[24px] border border-slate-200 bg-white p-6 shadow-[0_10px_30px_rgba(15,23,42,0.04)]">
-                        <div className="flex items-center justify-between gap-4">
-                            <div>
-                                <h3 className="text-lg font-semibold text-slate-950">
-                                    Monthly Sales
-                                </h3>
-                                <p className="text-sm text-slate-500">
-                                    Sales summary for the current period.
-                                </p>
-                            </div>
-                            <button
-                                type="button"
-                                className="rounded-xl px-2 py-1 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
-                                aria-label="Monthly sales options"
-                            >
-                                <span className="text-2xl leading-none">...</span>
-                            </button>
-                        </div>
-
-                        <div className="mt-6 flex h-72 items-end gap-4 rounded-[24px] bg-slate-50 px-6 py-6">
-                            {monthlySales.map((value, index) => (
-                                <div key={monthlyLabels[index]} className="flex flex-1 flex-col items-center gap-3">
-                                    <div className="flex h-52 w-full items-end justify-center">
+                        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                            {statCards.map((card) => (
+                                <article
+                                    key={card.label}
+                                    className="rounded-2xl border border-slate-200 bg-slate-50 p-5 dark:border-white/10 dark:bg-white/5"
+                                >
+                                    <div className="flex items-start justify-between gap-3">
                                         <div
-                                            className="w-7 rounded-t-2xl bg-indigo-500"
-                                            style={{ height: `${value / 2}px` }}
-                                        />
+                                            className={`inline-flex h-11 w-11 items-center justify-center rounded-2xl ${
+                                                card.tone === 'success'
+                                                    ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-300'
+                                                    : card.tone === 'warning'
+                                                      ? 'bg-amber-500/10 text-amber-600 dark:text-amber-300'
+                                                      : card.tone === 'danger'
+                                                        ? 'bg-rose-500/10 text-rose-600 dark:text-rose-300'
+                                                        : 'bg-cyan-500/10 text-cyan-600 dark:text-cyan-300'
+                                            }`}
+                                        >
+                                            <StatIcon tone={card.tone} />
+                                        </div>
+                                        <StatusBadge tone={card.tone}>
+                                            {card.label}
+                                        </StatusBadge>
                                     </div>
-                                    <span className="text-xs text-slate-500">
-                                        {monthlyLabels[index]}
-                                    </span>
-                                </div>
+                                    <p className="mt-5 text-3xl font-semibold tracking-tight text-slate-950 dark:text-white">
+                                        {card.value.toLocaleString('id-ID')}
+                                    </p>
+                                    <p className="mt-2 text-sm leading-6 text-slate-500 dark:text-slate-400">
+                                        {card.detail}
+                                    </p>
+                                </article>
                             ))}
                         </div>
-                    </section>
-                </div>
+                    </SurfaceBody>
+                </Surface>
 
-                <section className="rounded-[24px] border border-slate-200 bg-white p-6 shadow-[0_10px_30px_rgba(15,23,42,0.04)] xl:col-span-5">
-                    <div className="flex items-start justify-between gap-4">
-                        <div>
-                            <h3 className="text-lg font-semibold text-slate-950">
-                                Monthly Target
-                            </h3>
-                            <p className="text-sm text-slate-500">
-                                Target you&apos;ve set for each month
-                            </p>
-                        </div>
-                        <button
-                            type="button"
-                            className="rounded-xl px-2 py-1 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
-                            aria-label="Monthly target options"
-                        >
-                            <span className="text-2xl leading-none">...</span>
-                        </button>
-                    </div>
-
-                    <div className="mt-8 flex flex-col items-center justify-center">
-                        <div className="relative flex h-60 w-60 items-center justify-center rounded-full border-[14px] border-slate-200 border-t-indigo-500 border-r-indigo-500">
-                            <div className="text-center">
-                                <p className="text-4xl font-semibold text-slate-950">
-                                    75.55%
-                                </p>
-                                <p className="mt-2 rounded-full bg-emerald-50 px-3 py-1 text-sm font-semibold text-emerald-600">
-                                    +10%
-                                </p>
+                <div className="grid gap-6 xl:grid-cols-[minmax(0,1.4fr)_minmax(320px,0.9fr)]">
+                    <Surface>
+                        <SurfaceBody className="space-y-5">
+                            <div className="flex flex-wrap items-start justify-between gap-4">
+                                <div>
+                                    <h3 className="text-lg font-semibold text-slate-950 dark:text-white">
+                                        Borrowing activity
+                                    </h3>
+                                    <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                                        Perbandingan aliran peminjaman dan
+                                        pengembalian selama tujuh hari terakhir.
+                                    </p>
+                                </div>
+                                <StatusBadge tone="info">
+                                    Utilization {utilization}%
+                                </StatusBadge>
                             </div>
-                        </div>
-                        <p className="mt-6 max-w-sm text-center text-sm leading-6 text-slate-500">
-                            You earn $3287 today, it&apos;s higher than last month.
-                            Keep up your good work!
-                        </p>
-                    </div>
 
-                    <div className="mt-6 grid grid-cols-3 border-t border-slate-200 pt-6 text-center">
-                        {summary.map(([label, value, trend]) => (
-                            <div key={label} className="space-y-1">
-                                <p className="text-sm text-slate-500">{label}</p>
-                                <p className="text-lg font-semibold text-slate-950">
-                                    {value}{' '}
-                                    <span
-                                        className={
-                                            trend === 'down'
-                                                ? 'text-rose-500'
-                                                : 'text-emerald-500'
-                                        }
+                            <div className="rounded-2xl border border-slate-200 bg-white p-4 dark:border-white/10 dark:bg-slate-950/50">
+                                <svg
+                                    viewBox="0 0 640 280"
+                                    className="h-72 w-full"
+                                    role="img"
+                                    aria-label="Borrowing activity chart"
+                                >
+                                    <defs>
+                                        <linearGradient
+                                            id="borrowFill"
+                                            x1="0"
+                                            y1="0"
+                                            x2="0"
+                                            y2="1"
+                                        >
+                                            <stop
+                                                offset="0%"
+                                                stopColor="#465FFF"
+                                                stopOpacity="0.32"
+                                            />
+                                            <stop
+                                                offset="100%"
+                                                stopColor="#465FFF"
+                                                stopOpacity="0.02"
+                                            />
+                                        </linearGradient>
+                                    </defs>
+                                    <line
+                                        x1="0"
+                                        y1="230"
+                                        x2="640"
+                                        y2="230"
+                                        stroke="currentColor"
+                                        className="text-slate-200 dark:text-white/10"
+                                    />
+                                    <path
+                                        d={buildAreaPath(weeklyBorrowing)}
+                                        fill="url(#borrowFill)"
+                                    />
+                                    <path
+                                        d={buildLinePath(weeklyBorrowing)}
+                                        fill="none"
+                                        stroke="#465FFF"
+                                        strokeWidth="4"
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                    />
+                                    <path
+                                        d={buildLinePath(weeklyReturns)}
+                                        fill="none"
+                                        stroke="#06B6D4"
+                                        strokeWidth="3"
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeDasharray="8 8"
+                                    />
+                                </svg>
+                            </div>
+
+                            <div className="grid gap-3 sm:grid-cols-3">
+                                {weeklyLabels.map((label, index) => (
+                                    <div
+                                        key={label}
+                                        className="rounded-2xl border border-slate-200 bg-slate-50 p-4 dark:border-white/10 dark:bg-white/5"
                                     >
-                                        {trend === 'down' ? '↓' : '↑'}
-                                    </span>
-                                </p>
+                                        <p className="text-xs font-semibold tracking-[0.24em] text-slate-400 uppercase">
+                                            {label}
+                                        </p>
+                                        <p className="mt-2 text-2xl font-semibold text-slate-950 dark:text-white">
+                                            {weeklyBorrowing[index]}
+                                        </p>
+                                        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                                            borrow events
+                                        </p>
+                                    </div>
+                                ))}
                             </div>
-                        ))}
-                    </div>
-                </section>
+                        </SurfaceBody>
+                    </Surface>
 
-                <section className="rounded-[24px] border border-slate-200 bg-white p-6 shadow-[0_10px_30px_rgba(15,23,42,0.04)] xl:col-span-12">
-                    <div className="flex items-center justify-between gap-4">
-                        <div>
-                            <h3 className="text-lg font-semibold text-slate-950">
-                                Statistics
-                            </h3>
-                            <p className="text-sm text-slate-500">
-                                Target you&apos;ve set for each month
-                            </p>
-                        </div>
-                        <div className="flex items-center gap-2 rounded-2xl border border-slate-200 bg-slate-50 p-1 text-sm text-slate-500">
-                            <button className="rounded-xl bg-white px-3 py-2 font-medium text-slate-950 shadow-sm">
-                                Overview
-                            </button>
-                            <button className="rounded-xl px-3 py-2">
-                                Sales
-                            </button>
-                            <button className="rounded-xl px-3 py-2">
-                                Revenue
-                            </button>
-                        </div>
-                    </div>
+                    <Surface>
+                        <SurfaceBody className="space-y-6">
+                            <div className="flex items-start justify-between gap-4">
+                                <div>
+                                    <h3 className="text-lg font-semibold text-slate-950 dark:text-white">
+                                        Stock pressure
+                                    </h3>
+                                    <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                                        Distribusi unit yang paling memengaruhi
+                                        ketersediaan.
+                                    </p>
+                                </div>
+                                <StatusBadge
+                                    tone={
+                                        stats.overdue_loans > 0
+                                            ? 'danger'
+                                            : 'success'
+                                    }
+                                >
+                                    {stats.overdue_loans > 0
+                                        ? 'Attention'
+                                        : 'Stable'}
+                                </StatusBadge>
+                            </div>
 
-                    <div className="mt-6 rounded-[24px] bg-slate-50 px-4 py-6">
-                        <svg viewBox="0 0 640 260" className="h-72 w-full">
-                            <defs>
-                                <linearGradient id="areaFillPrimary" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="0%" stopColor="#6366f1" stopOpacity="0.28" />
-                                    <stop offset="100%" stopColor="#6366f1" stopOpacity="0.02" />
-                                </linearGradient>
-                            </defs>
-                            <path
-                                d={buildAreaPath(areaPrimary)}
-                                fill="url(#areaFillPrimary)"
-                            />
-                            <path
-                                d={buildLinePath(areaPrimary)}
-                                fill="none"
-                                stroke="#6366f1"
-                                strokeWidth="3"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                            />
-                            <path
-                                d={buildLinePath(areaSecondary)}
-                                fill="none"
-                                stroke="#93c5fd"
-                                strokeWidth="3"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                            />
-                        </svg>
-                    </div>
-                </section>
+                            <div className="flex justify-center">
+                                <div className="relative flex h-64 w-64 items-center justify-center">
+                                    <svg
+                                        viewBox="0 0 220 220"
+                                        className="h-full w-full"
+                                    >
+                                        <circle
+                                            cx="110"
+                                            cy="110"
+                                            r="84"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            strokeWidth="16"
+                                            className="text-slate-200 dark:text-white/10"
+                                        />
+                                        <circle
+                                            cx="110"
+                                            cy="110"
+                                            r="84"
+                                            fill="none"
+                                            stroke="#465FFF"
+                                            strokeWidth="16"
+                                            strokeLinecap="round"
+                                            strokeDasharray={`${2 * Math.PI * 84}`}
+                                            strokeDashoffset={`${2 * Math.PI * 84 * (1 - utilization / 100)}`}
+                                            transform="rotate(-90 110 110)"
+                                        />
+                                        <circle
+                                            cx="110"
+                                            cy="110"
+                                            r="62"
+                                            fill="none"
+                                            stroke="#06B6D4"
+                                            strokeWidth="10"
+                                            strokeLinecap="round"
+                                            strokeDasharray={`${2 * Math.PI * 62}`}
+                                            strokeDashoffset={`${2 * Math.PI * 62 * (1 - availableRate / 100)}`}
+                                            transform="rotate(-90 110 110)"
+                                            opacity="0.8"
+                                        />
+                                    </svg>
+
+                                    <div className="absolute text-center">
+                                        <p className="text-4xl font-semibold tracking-tight text-slate-950 dark:text-white">
+                                            {utilization}%
+                                        </p>
+                                        <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
+                                            borrowed utilization
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="space-y-3">
+                                {stockPressure.map(([label, value, tone]) => (
+                                    <div
+                                        key={label}
+                                        className="rounded-2xl border border-slate-200 bg-slate-50 p-4 dark:border-white/10 dark:bg-white/5"
+                                    >
+                                        <div className="flex items-center justify-between gap-3">
+                                            <div className="flex items-center gap-3">
+                                                <span
+                                                    className={`h-2.5 w-2.5 rounded-full ${
+                                                        tone === 'success'
+                                                            ? 'bg-emerald-500'
+                                                            : tone === 'danger'
+                                                              ? 'bg-rose-500'
+                                                              : 'bg-cyan-500'
+                                                    }`}
+                                                />
+                                                <span className="text-sm font-medium text-slate-700 dark:text-slate-200">
+                                                    {label}
+                                                </span>
+                                            </div>
+                                            <span className="text-sm font-semibold text-slate-950 dark:text-white">
+                                                {value.toLocaleString('id-ID')}
+                                            </span>
+                                        </div>
+                                        <div className="mt-3 h-2 rounded-full bg-slate-100 dark:bg-white/10">
+                                            <div
+                                                className={`h-2 rounded-full ${
+                                                    tone === 'success'
+                                                        ? 'bg-emerald-500'
+                                                        : tone === 'danger'
+                                                          ? 'bg-rose-500'
+                                                          : 'bg-cyan-500'
+                                                }`}
+                                                style={{
+                                                    width: `${Math.max((value / totalTracked) * 100, 8)}%`,
+                                                }}
+                                            />
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </SurfaceBody>
+                    </Surface>
+                </div>
             </div>
         </AppLayout>
     );
 }
 
-function MetricIcon({ name }: { name: string }): React.ReactNode {
-    if (name === 'users') {
+function StatIcon({ tone }: { tone: StatCard['tone'] }): React.ReactNode {
+    if (tone === 'success') {
         return (
-            <svg className="h-5 w-5" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+            <svg
+                viewBox="0 0 20 20"
+                className="h-5 w-5"
+                fill="none"
+                aria-hidden="true"
+            >
                 <path
-                    d="M15.5 16a4.5 4.5 0 0 0-9 0"
+                    d="M4 10.5 8 14 16 6"
                     stroke="currentColor"
-                    strokeWidth="1.6"
+                    strokeWidth="1.8"
                     strokeLinecap="round"
-                />
-                <path
-                    d="M10 10.5a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"
-                    stroke="currentColor"
-                    strokeWidth="1.6"
                     strokeLinejoin="round"
-                />
-                <path
-                    d="M4 16a3.8 3.8 0 0 1 3-3.7"
-                    stroke="currentColor"
-                    strokeWidth="1.6"
-                    strokeLinecap="round"
                 />
             </svg>
         );
     }
 
+    if (tone === 'warning') {
+        return (
+            <svg
+                viewBox="0 0 20 20"
+                className="h-5 w-5"
+                fill="none"
+                aria-hidden="true"
+            >
+                <path
+                    d="M10 4 3.5 15h13L10 4Z"
+                    stroke="currentColor"
+                    strokeWidth="1.8"
+                    strokeLinejoin="round"
+                />
+                <path
+                    d="M10 8v3.5"
+                    stroke="currentColor"
+                    strokeWidth="1.8"
+                    strokeLinecap="round"
+                />
+                <circle cx="10" cy="13.5" r="0.9" fill="currentColor" />
+            </svg>
+        );
+    }
+
+    if (tone === 'danger') {
+        return (
+            <svg
+                viewBox="0 0 20 20"
+                className="h-5 w-5"
+                fill="none"
+                aria-hidden="true"
+            >
+                <path
+                    d="M10 3.5 16.5 10 10 16.5 3.5 10 10 3.5Z"
+                    stroke="currentColor"
+                    strokeWidth="1.8"
+                    strokeLinejoin="round"
+                />
+                <path
+                    d="M10 7.2v3.7"
+                    stroke="currentColor"
+                    strokeWidth="1.8"
+                    strokeLinecap="round"
+                />
+                <circle cx="10" cy="13.2" r="0.9" fill="currentColor" />
+            </svg>
+        );
+    }
+
     return (
-        <svg className="h-5 w-5" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+        <svg
+            viewBox="0 0 20 20"
+            className="h-5 w-5"
+            fill="none"
+            aria-hidden="true"
+        >
             <path
-                d="M4.5 6.5 10 3l5.5 3.5L10 10 4.5 6.5Z"
+                d="M4 10h12"
                 stroke="currentColor"
-                strokeWidth="1.6"
-                strokeLinejoin="round"
+                strokeWidth="1.8"
+                strokeLinecap="round"
             />
             <path
-                d="M4.5 6.5V13L10 16.5 15.5 13V6.5"
+                d="M10 4v12"
                 stroke="currentColor"
-                strokeWidth="1.6"
-                strokeLinejoin="round"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+            />
+            <circle
+                cx="10"
+                cy="10"
+                r="6"
+                stroke="currentColor"
+                strokeWidth="1.2"
+                opacity="0.45"
             />
         </svg>
     );
@@ -284,7 +470,6 @@ function buildLinePath(values: number[]): string {
     const max = Math.max(...values);
     const min = Math.min(...values);
     const range = Math.max(max - min, 1);
-
 
     return values
         .map((value, index) => {

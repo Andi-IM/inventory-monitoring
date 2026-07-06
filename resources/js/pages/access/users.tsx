@@ -1,6 +1,7 @@
 import { Form } from '@inertiajs/react';
 import { AppLayout } from '@/components/app-layout';
 import {
+    DangerButton,
     EmptyState,
     Field,
     Input,
@@ -74,7 +75,11 @@ export default function Users({
                             </Select>
                         </Field>
                         <Field label="Grup" hint="Bisa lebih dari satu">
-                            <Select name="group_ids[]" multiple className="min-h-32">
+                            <Select
+                                name="group_ids[]"
+                                multiple
+                                className="min-h-32"
+                            >
                                 {groups.map((group) => (
                                     <option key={group.id} value={group.id}>
                                         {group.name}
@@ -103,7 +108,10 @@ export default function Users({
                 }
             >
                 {users.map((user) => (
-                    <tr key={user.id} className="hover:bg-slate-50/70 dark:hover:bg-white/5">
+                    <tr
+                        key={user.id}
+                        className="hover:bg-slate-50/70 dark:hover:bg-white/5"
+                    >
                         <RowValue>
                             <div className="font-medium text-slate-950 dark:text-white">
                                 {user.name}
@@ -112,13 +120,13 @@ export default function Users({
                         <RowValue>{user.email}</RowValue>
                         <RowValue>{user.role}</RowValue>
                         <RowValue>
-                            {user.groups.map((group) => group.name).join(', ') || '-'}
+                            {user.groups
+                                .map((group) => group.name)
+                                .join(', ') || '-'}
                         </RowValue>
                         <RowValue align="right">
                             <Form {...destroy.form(user.id)}>
-                                <button className="rounded-full border border-rose-200 px-3 py-1 text-xs font-semibold text-rose-600 transition hover:bg-rose-50 hover:text-rose-500">
-                                    Hapus
-                                </button>
+                                <DangerButton>Hapus</DangerButton>
                             </Form>
                         </RowValue>
                     </tr>

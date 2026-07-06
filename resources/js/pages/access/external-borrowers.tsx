@@ -1,6 +1,7 @@
 import { Form } from '@inertiajs/react';
 import { AppLayout } from '@/components/app-layout';
 import {
+    DangerButton,
     EmptyState,
     Field,
     Input,
@@ -88,7 +89,10 @@ export default function ExternalBorrowers({
                 }
             >
                 {borrowers.map((borrower) => (
-                    <tr key={borrower.id} className="hover:bg-slate-50/70 dark:hover:bg-white/5">
+                    <tr
+                        key={borrower.id}
+                        className="hover:bg-slate-50/70 dark:hover:bg-white/5"
+                    >
                         <RowValue>
                             <div className="font-medium text-slate-950 dark:text-white">
                                 {borrower.name}
@@ -99,9 +103,7 @@ export default function ExternalBorrowers({
                         <RowValue>{borrower.group?.name ?? '-'}</RowValue>
                         <RowValue align="right">
                             <Form {...destroy.form(borrower.id)}>
-                                <button className="rounded-full border border-rose-200 px-3 py-1 text-xs font-semibold text-rose-600 transition hover:bg-rose-50 hover:text-rose-500">
-                                    Hapus
-                                </button>
+                                <DangerButton>Hapus</DangerButton>
                             </Form>
                         </RowValue>
                     </tr>

@@ -1,6 +1,7 @@
 import { Form } from '@inertiajs/react';
 import { AppLayout } from '@/components/app-layout';
 import {
+    DangerButton,
     EmptyState,
     Field,
     Input,
@@ -64,7 +65,10 @@ export default function Categories({ categories }: { categories: Category[] }) {
                 }
             >
                 {categories.map((category) => (
-                    <tr key={category.id} className="hover:bg-slate-50/70 dark:hover:bg-white/5">
+                    <tr
+                        key={category.id}
+                        className="hover:bg-slate-50/70 dark:hover:bg-white/5"
+                    >
                         <RowValue>
                             <div className="font-medium text-slate-950 dark:text-white">
                                 {category.name}
@@ -72,7 +76,9 @@ export default function Categories({ categories }: { categories: Category[] }) {
                         </RowValue>
                         <RowValue>
                             {category.code ? (
-                                <StatusBadge tone="info">{category.code}</StatusBadge>
+                                <StatusBadge tone="info">
+                                    {category.code}
+                                </StatusBadge>
                             ) : (
                                 '-'
                             )}
@@ -80,9 +86,7 @@ export default function Categories({ categories }: { categories: Category[] }) {
                         <RowValue>{category.items_count}</RowValue>
                         <RowValue align="right">
                             <Form {...destroy.form(category.id)}>
-                                <button className="rounded-full border border-rose-200 px-3 py-1 text-xs font-semibold text-rose-600 transition hover:bg-rose-50 hover:text-rose-500">
-                                    Hapus
-                                </button>
+                                <DangerButton>Hapus</DangerButton>
                             </Form>
                         </RowValue>
                     </tr>
