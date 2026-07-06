@@ -8,7 +8,7 @@ readonly class ItemUnitDTO
         public int $id,
         public int $item_id,
         public string $asset_code,
-        public string $location,
+        public ?string $location,
         public string $status,
         public ?ItemDTO $item = null
     ) {}
