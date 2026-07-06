@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
+use Inertia\ExceptionResponse;
+use Inertia\Inertia;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -27,6 +29,7 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->configureAuthorization();
         $this->configureDefaults();
+        $this->configureExceptionPages();
     }
 
     protected function configureAuthorization(): void
@@ -60,5 +63,20 @@ class AppServiceProvider extends ServiceProvider
                 ->uncompromised()
             : null,
         );
+    }
+
+    protected function configureExceptionPages(): void
+    {
+        Inertia::handleExceptionsUsing(function (ExceptionResponse $response) {
+            if (! in_array($response->statusCode(), [404, 500, 503], true)) {
+                return null;
+            }
+
+            return $response
+                ->render('errors/http-error', [
+                    'status' => $response->statusCode(),
+                ])
+                ->withSharedData();
+        });
     }
 }
