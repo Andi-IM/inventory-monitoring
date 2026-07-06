@@ -10,10 +10,12 @@ on:
 
 permissions:
   contents: write
+  issues: write
+  pull-requests: write
 
 jobs:
   release:
-    name: Build & Release
+    name: Validate & Prepare Release
     runs-on: ubuntu-latest
 
     steps:
@@ -69,11 +71,10 @@ jobs:
       - name: Run All Tests
         run: php artisan test
 
-      - name: Semantic Release
-        uses: cycjimmy/semantic-release-action@v6
+      - name: Release Please
+        id: release
+        uses: googleapis/release-please-action@8b8fd2cc23b2e18957157a9d923d75aa0c6f6ad5 # v4
         with:
-          extra_plugins: |
-            @semantic-release/changelog
-            @semantic-release/git
-        env:
-          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
+          token: ${{ secrets.GH_PAT }}
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
