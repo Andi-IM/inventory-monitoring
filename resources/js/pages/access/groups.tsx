@@ -1,11 +1,15 @@
 import { Form } from '@inertiajs/react';
+import { useState } from 'react';
 import { AppLayout } from '@/components/app-layout';
 import {
     DangerButton,
     EmptyState,
     Field,
     Input,
+    Modal,
+    ModalActions,
     RowValue,
+    SecondaryButton,
     SectionHeader,
     Select,
     SubmitButton,
@@ -31,6 +35,8 @@ export default function Groups({
     groups: Group[];
     types: string[];
 }) {
+    const [createOpen, setCreateOpen] = useState(false);
+
     return (
         <AppLayout title="Grup">
             <Surface>
@@ -39,40 +45,57 @@ export default function Groups({
                         eyebrow="Access"
                         title="Group registry"
                         description="Definisikan grup untuk otorisasi user dan peminjam eksternal."
-                    />
-
-                    <Form
-                        {...store.form()}
-                        resetOnSuccess
-                        className="grid gap-4 md:grid-cols-2 xl:grid-cols-3"
-                    >
-                        <Field label="Nama grup">
-                            <Input name="name" placeholder="Nama grup" />
-                        </Field>
-                        <Field label="Tipe">
-                            <Select name="type" defaultValue="">
-                                <option value="">Pilih tipe</option>
-                                {types.map((type) => (
-                                    <option key={type} value={type}>
-                                        {type}
-                                    </option>
-                                ))}
-                            </Select>
-                        </Field>
-                        <Field label="Deskripsi" hint="Opsional">
-                            <Input
-                                name="description"
-                                placeholder="Deskripsi singkat"
-                            />
-                        </Field>
-                        <div className="flex items-end md:col-span-2 xl:col-span-3">
-                            <SubmitButton className="w-full sm:w-auto">
+                        action={
+                            <SubmitButton
+                                type="button"
+                                onClick={() => setCreateOpen(true)}
+                            >
                                 Tambah Grup
                             </SubmitButton>
-                        </div>
-                    </Form>
+                        }
+                    />
                 </SurfaceBody>
             </Surface>
+
+            <Modal
+                open={createOpen}
+                title="Tambah grup"
+                description="Buat grup akses untuk user internal dan peminjam eksternal."
+                onClose={() => setCreateOpen(false)}
+            >
+                <Form
+                    {...store.form()}
+                    resetOnSuccess
+                    onSuccess={() => setCreateOpen(false)}
+                    className="grid gap-4"
+                >
+                    <Field label="Nama grup">
+                        <Input name="name" placeholder="Nama grup" />
+                    </Field>
+                    <Field label="Tipe">
+                        <Select name="type" defaultValue="">
+                            <option value="">Pilih tipe</option>
+                            {types.map((type) => (
+                                <option key={type} value={type}>
+                                    {type}
+                                </option>
+                            ))}
+                        </Select>
+                    </Field>
+                    <Field label="Deskripsi" hint="Opsional">
+                        <Input
+                            name="description"
+                            placeholder="Deskripsi singkat"
+                        />
+                    </Field>
+                    <ModalActions>
+                        <SecondaryButton onClick={() => setCreateOpen(false)}>
+                            Batal
+                        </SecondaryButton>
+                        <SubmitButton>Tambah Grup</SubmitButton>
+                    </ModalActions>
+                </Form>
+            </Modal>
 
             <TableShell
                 headers={['Nama', 'Tipe', 'User', 'Eksternal', '']}

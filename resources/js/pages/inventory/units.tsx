@@ -1,11 +1,15 @@
 import { Form } from '@inertiajs/react';
+import { useState } from 'react';
 import { AppLayout } from '@/components/app-layout';
 import {
     DangerButton,
     EmptyState,
     Field,
     Input,
+    Modal,
+    ModalActions,
     RowValue,
+    SecondaryButton,
     SectionHeader,
     Select,
     StatusBadge,
@@ -34,6 +38,8 @@ export default function Units({
     items: Item[];
     statuses: string[];
 }) {
+    const [createOpen, setCreateOpen] = useState(false);
+
     return (
         <AppLayout title="Unit Alat">
             <Surface>
@@ -42,49 +48,66 @@ export default function Units({
                         eyebrow="Inventory"
                         title="Unit tracker"
                         description="Kelola unit aset dengan lokasi dan status yang mudah dipantau."
-                    />
-
-                    <Form
-                        {...store.form()}
-                        resetOnSuccess
-                        className="grid gap-4 md:grid-cols-2 xl:grid-cols-4"
-                    >
-                        <Field label="Alat">
-                            <Select name="item_id" defaultValue="">
-                                <option value="">Pilih alat</option>
-                                {items.map((item) => (
-                                    <option key={item.id} value={item.id}>
-                                        {item.name}
-                                    </option>
-                                ))}
-                            </Select>
-                        </Field>
-                        <Field label="Kode aset">
-                            <Input name="asset_code" placeholder="Kode aset" />
-                        </Field>
-                        <Field label="Lokasi" hint="Opsional">
-                            <Input
-                                name="location"
-                                placeholder="Lokasi penyimpanan"
-                            />
-                        </Field>
-                        <Field label="Status">
-                            <Select name="status" defaultValue="available">
-                                {statuses.map((status) => (
-                                    <option key={status} value={status}>
-                                        {status}
-                                    </option>
-                                ))}
-                            </Select>
-                        </Field>
-                        <div className="flex items-end md:col-span-2 xl:col-span-4">
-                            <SubmitButton className="w-full sm:w-auto">
+                        action={
+                            <SubmitButton
+                                type="button"
+                                onClick={() => setCreateOpen(true)}
+                            >
                                 Tambah Unit
                             </SubmitButton>
-                        </div>
-                    </Form>
+                        }
+                    />
                 </SurfaceBody>
             </Surface>
+
+            <Modal
+                open={createOpen}
+                title="Tambah unit"
+                description="Catat unit aset baru lengkap dengan kode, lokasi, dan status awal."
+                onClose={() => setCreateOpen(false)}
+            >
+                <Form
+                    {...store.form()}
+                    resetOnSuccess
+                    onSuccess={() => setCreateOpen(false)}
+                    className="grid gap-4"
+                >
+                    <Field label="Alat">
+                        <Select name="item_id" defaultValue="">
+                            <option value="">Pilih alat</option>
+                            {items.map((item) => (
+                                <option key={item.id} value={item.id}>
+                                    {item.name}
+                                </option>
+                            ))}
+                        </Select>
+                    </Field>
+                    <Field label="Kode aset">
+                        <Input name="asset_code" placeholder="Kode aset" />
+                    </Field>
+                    <Field label="Lokasi" hint="Opsional">
+                        <Input
+                            name="location"
+                            placeholder="Lokasi penyimpanan"
+                        />
+                    </Field>
+                    <Field label="Status">
+                        <Select name="status" defaultValue="available">
+                            {statuses.map((status) => (
+                                <option key={status} value={status}>
+                                    {status}
+                                </option>
+                            ))}
+                        </Select>
+                    </Field>
+                    <ModalActions>
+                        <SecondaryButton onClick={() => setCreateOpen(false)}>
+                            Batal
+                        </SecondaryButton>
+                        <SubmitButton>Tambah Unit</SubmitButton>
+                    </ModalActions>
+                </Form>
+            </Modal>
 
             <TableShell
                 headers={['Kode aset', 'Alat', 'Lokasi', 'Status', '']}

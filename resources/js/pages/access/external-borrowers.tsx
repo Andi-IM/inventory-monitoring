@@ -1,11 +1,15 @@
 import { Form } from '@inertiajs/react';
+import { useState } from 'react';
 import { AppLayout } from '@/components/app-layout';
 import {
     DangerButton,
     EmptyState,
     Field,
     Input,
+    Modal,
+    ModalActions,
     RowValue,
+    SecondaryButton,
     SectionHeader,
     Select,
     SubmitButton,
@@ -31,6 +35,8 @@ export default function ExternalBorrowers({
     borrowers: Borrower[];
     groups: Group[];
 }) {
+    const [createOpen, setCreateOpen] = useState(false);
+
     return (
         <AppLayout title="Peminjam Eksternal">
             <Surface>
@@ -39,43 +45,60 @@ export default function ExternalBorrowers({
                         eyebrow="Access"
                         title="External borrowers"
                         description="Daftarkan peminjam dari luar organisasi dan hubungkan ke grup."
-                    />
-
-                    <Form
-                        {...store.form()}
-                        resetOnSuccess
-                        className="grid gap-4 md:grid-cols-2 xl:grid-cols-4"
-                    >
-                        <Field label="Nama">
-                            <Input name="name" placeholder="Nama peminjam" />
-                        </Field>
-                        <Field label="Identitas">
-                            <Input
-                                name="identity_number"
-                                placeholder="NIS/NIM/NIP"
-                            />
-                        </Field>
-                        <Field label="Kontak">
-                            <Input name="contact" placeholder="Nomor kontak" />
-                        </Field>
-                        <Field label="Grup" hint="Opsional">
-                            <Select name="group_id" defaultValue="">
-                                <option value="">Pilih grup</option>
-                                {groups.map((group) => (
-                                    <option key={group.id} value={group.id}>
-                                        {group.name}
-                                    </option>
-                                ))}
-                            </Select>
-                        </Field>
-                        <div className="flex items-end md:col-span-2 xl:col-span-4">
-                            <SubmitButton className="w-full sm:w-auto">
+                        action={
+                            <SubmitButton
+                                type="button"
+                                onClick={() => setCreateOpen(true)}
+                            >
                                 Tambah Peminjam
                             </SubmitButton>
-                        </div>
-                    </Form>
+                        }
+                    />
                 </SurfaceBody>
             </Surface>
+
+            <Modal
+                open={createOpen}
+                title="Tambah peminjam eksternal"
+                description="Daftarkan identitas dan kontak peminjam dari luar organisasi."
+                onClose={() => setCreateOpen(false)}
+            >
+                <Form
+                    {...store.form()}
+                    resetOnSuccess
+                    onSuccess={() => setCreateOpen(false)}
+                    className="grid gap-4"
+                >
+                    <Field label="Nama">
+                        <Input name="name" placeholder="Nama peminjam" />
+                    </Field>
+                    <Field label="Identitas">
+                        <Input
+                            name="identity_number"
+                            placeholder="NIS/NIM/NIP"
+                        />
+                    </Field>
+                    <Field label="Kontak">
+                        <Input name="contact" placeholder="Nomor kontak" />
+                    </Field>
+                    <Field label="Grup" hint="Opsional">
+                        <Select name="group_id" defaultValue="">
+                            <option value="">Pilih grup</option>
+                            {groups.map((group) => (
+                                <option key={group.id} value={group.id}>
+                                    {group.name}
+                                </option>
+                            ))}
+                        </Select>
+                    </Field>
+                    <ModalActions>
+                        <SecondaryButton onClick={() => setCreateOpen(false)}>
+                            Batal
+                        </SecondaryButton>
+                        <SubmitButton>Tambah Peminjam</SubmitButton>
+                    </ModalActions>
+                </Form>
+            </Modal>
 
             <TableShell
                 headers={['Nama', 'Identitas', 'Kontak', 'Grup', '']}

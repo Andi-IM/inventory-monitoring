@@ -1,11 +1,15 @@
 import { Form } from '@inertiajs/react';
+import { useState } from 'react';
 import { AppLayout } from '@/components/app-layout';
 import {
     DangerButton,
     EmptyState,
     Field,
     Input,
+    Modal,
+    ModalActions,
     RowValue,
+    SecondaryButton,
     SectionHeader,
     Select,
     SubmitButton,
@@ -33,6 +37,8 @@ export default function Users({
     groups: Group[];
     roles: string[];
 }) {
+    const [createOpen, setCreateOpen] = useState(false);
+
     return (
         <AppLayout title="User">
             <Surface>
@@ -41,60 +47,77 @@ export default function Users({
                         eyebrow="Access"
                         title="User management"
                         description="Kelola akun internal, role, dan grup akses dari satu layar."
-                    />
-
-                    <Form
-                        {...store.form()}
-                        resetOnSuccess
-                        className="grid gap-4 md:grid-cols-2 xl:grid-cols-3"
-                    >
-                        <Field label="Nama" hint="Wajib">
-                            <Input name="name" placeholder="Nama pengguna" />
-                        </Field>
-                        <Field label="Email" hint="Login email">
-                            <Input
-                                name="email"
-                                type="email"
-                                placeholder="nama@contoh.com"
-                            />
-                        </Field>
-                        <Field label="Kata sandi" hint="Buat rahasia baru">
-                            <Input
-                                name="password"
-                                type="password"
-                                placeholder="Password"
-                            />
-                        </Field>
-                        <Field label="Role">
-                            <Select name="role" defaultValue={roles[0]}>
-                                {roles.map((role) => (
-                                    <option key={role} value={role}>
-                                        {role}
-                                    </option>
-                                ))}
-                            </Select>
-                        </Field>
-                        <Field label="Grup" hint="Bisa lebih dari satu">
-                            <Select
-                                name="group_ids[]"
-                                multiple
-                                className="min-h-32"
+                        action={
+                            <SubmitButton
+                                type="button"
+                                onClick={() => setCreateOpen(true)}
                             >
-                                {groups.map((group) => (
-                                    <option key={group.id} value={group.id}>
-                                        {group.name}
-                                    </option>
-                                ))}
-                            </Select>
-                        </Field>
-                        <div className="flex items-end md:col-span-2 xl:col-span-3">
-                            <SubmitButton className="w-full sm:w-auto">
                                 Tambah User
                             </SubmitButton>
-                        </div>
-                    </Form>
+                        }
+                    />
                 </SurfaceBody>
             </Surface>
+
+            <Modal
+                open={createOpen}
+                title="Tambah user"
+                description="Buat akun internal baru, pilih role, dan hubungkan ke grup akses."
+                onClose={() => setCreateOpen(false)}
+            >
+                <Form
+                    {...store.form()}
+                    resetOnSuccess
+                    onSuccess={() => setCreateOpen(false)}
+                    className="grid gap-4"
+                >
+                    <Field label="Nama" hint="Wajib">
+                        <Input name="name" placeholder="Nama pengguna" />
+                    </Field>
+                    <Field label="Email" hint="Login email">
+                        <Input
+                            name="email"
+                            type="email"
+                            placeholder="nama@contoh.com"
+                        />
+                    </Field>
+                    <Field label="Kata sandi" hint="Buat rahasia baru">
+                        <Input
+                            name="password"
+                            type="password"
+                            placeholder="Password"
+                        />
+                    </Field>
+                    <Field label="Role">
+                        <Select name="role" defaultValue={roles[0]}>
+                            {roles.map((role) => (
+                                <option key={role} value={role}>
+                                    {role}
+                                </option>
+                            ))}
+                        </Select>
+                    </Field>
+                    <Field label="Grup" hint="Bisa lebih dari satu">
+                        <Select
+                            name="group_ids[]"
+                            multiple
+                            className="min-h-32"
+                        >
+                            {groups.map((group) => (
+                                <option key={group.id} value={group.id}>
+                                    {group.name}
+                                </option>
+                            ))}
+                        </Select>
+                    </Field>
+                    <ModalActions>
+                        <SecondaryButton onClick={() => setCreateOpen(false)}>
+                            Batal
+                        </SecondaryButton>
+                        <SubmitButton>Tambah User</SubmitButton>
+                    </ModalActions>
+                </Form>
+            </Modal>
 
             <TableShell
                 headers={['Nama', 'Email', 'Role', 'Grup', '']}
