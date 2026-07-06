@@ -241,19 +241,42 @@ export function AppLayout({ title, children }: AppLayoutProps) {
                                     aria-label="Toggle theme"
                                     onClick={toggleTheme}
                                 >
-                                    <svg
-                                        className="h-5 w-5"
-                                        viewBox="0 0 20 20"
-                                        fill="none"
-                                        aria-hidden="true"
-                                    >
-                                        <path
-                                            d="M10 3.5a6.5 6.5 0 1 0 6.5 6.5 5.8 5.8 0 0 1-6.5-6.5Z"
-                                            stroke="currentColor"
-                                            strokeWidth="1.6"
-                                            strokeLinejoin="round"
-                                        />
-                                    </svg>
+                                    {theme === 'dark' ? (
+                                        <svg
+                                            className="h-5 w-5"
+                                            viewBox="0 0 20 20"
+                                            fill="none"
+                                            aria-hidden="true"
+                                        >
+                                            <path
+                                                d="M10 1.8v2M10 16.2v2M4.2 4.2l1.4 1.4M14.4 14.4l1.4 1.4M1.8 10h2M16.2 10h2M4.2 15.8l1.4-1.4M14.4 5.6l1.4-1.4"
+                                                stroke="currentColor"
+                                                strokeWidth="1.6"
+                                                strokeLinecap="round"
+                                            />
+                                            <circle
+                                                cx="10"
+                                                cy="10"
+                                                r="3.6"
+                                                stroke="currentColor"
+                                                strokeWidth="1.6"
+                                            />
+                                        </svg>
+                                    ) : (
+                                        <svg
+                                            className="h-5 w-5"
+                                            viewBox="0 0 20 20"
+                                            fill="none"
+                                            aria-hidden="true"
+                                        >
+                                            <path
+                                                d="M10 3.5a6.5 6.5 0 1 0 6.5 6.5 5.8 5.8 0 0 1-6.5-6.5Z"
+                                                stroke="currentColor"
+                                                strokeWidth="1.6"
+                                                strokeLinejoin="round"
+                                            />
+                                        </svg>
+                                    )}
                                 </button>
 
                                 <button
