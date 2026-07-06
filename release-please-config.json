@@ -1,0 +1,10 @@
+{
+    "include-component-in-tag": false,
+    "packages": {
+        ".": {
+            "package-name": "inventory-monitoring",
+            "release-type": "simple",
+            "changelog-path": "CHANGELOG.md"
+        }
+    }
+}
