@@ -1,9 +1,13 @@
 import { Form } from '@inertiajs/react';
+import { useState } from 'react';
 import { AppLayout } from '@/components/app-layout';
 import {
     EmptyState,
     Field,
     Input,
+    Modal,
+    ModalActions,
+    SecondaryButton,
     SectionHeader,
     Select,
     StatusBadge,
@@ -51,6 +55,9 @@ export default function Loans({
     externalBorrowers,
     availableUnits,
 }: LoansProps) {
+    const [createOpen, setCreateOpen] = useState(false);
+    const [returnItemId, setReturnItemId] = useState<number | null>(null);
+
     return (
         <AppLayout title="Peminjaman">
             <Surface>
@@ -59,72 +66,83 @@ export default function Loans({
                         eyebrow="Borrowing"
                         title="Loan operations"
                         description="Buat pinjaman, pantau status, dan proses pengembalian parsial dari satu layar."
-                    />
-
-                    <Form
-                        {...store.form()}
-                        resetOnSuccess
-                        className="grid gap-4 lg:grid-cols-12"
-                    >
-                        <Field label="Tipe peminjam">
-                            <Select
-                                name="borrower_type"
-                                defaultValue="internal"
+                        action={
+                            <SubmitButton
+                                type="button"
+                                onClick={() => setCreateOpen(true)}
                             >
-                                <option value="internal">Internal</option>
-                                <option value="external">Eksternal</option>
-                            </Select>
-                        </Field>
-                        <Field label="Peminjam internal">
-                            <Select name="borrower_user_id" defaultValue="">
-                                <option value="">Pilih internal</option>
-                                {internalBorrowers.map((person) => (
-                                    <option key={person.id} value={person.id}>
-                                        {person.name}
-                                    </option>
-                                ))}
-                            </Select>
-                        </Field>
-                        <Field label="Peminjam eksternal">
-                            <Select name="external_borrower_id" defaultValue="">
-                                <option value="">Pilih eksternal</option>
-                                {externalBorrowers.map((person) => (
-                                    <option key={person.id} value={person.id}>
-                                        {person.name}
-                                    </option>
-                                ))}
-                            </Select>
-                        </Field>
-                        <Field label="Jatuh tempo">
-                            <Input name="due_at" type="datetime-local" />
-                        </Field>
-                        <Field label="Unit" hint="Bisa pilih banyak">
-                            <Select
-                                name="item_unit_ids[]"
-                                multiple
-                                className="min-h-40"
-                            >
-                                {availableUnits.map((unit) => (
-                                    <option key={unit.id} value={unit.id}>
-                                        {unit.asset_code} - {unit.item?.name}
-                                    </option>
-                                ))}
-                            </Select>
-                        </Field>
-                        <Field label="Catatan" hint="Opsional">
-                            <Input
-                                name="notes"
-                                placeholder="Catatan transaksi"
-                            />
-                        </Field>
-                        <div className="flex items-end lg:col-span-12">
-                            <SubmitButton className="w-full sm:w-auto">
                                 Pinjam Unit
                             </SubmitButton>
-                        </div>
-                    </Form>
+                        }
+                    />
                 </SurfaceBody>
             </Surface>
+
+            <Modal
+                open={createOpen}
+                title="Buat peminjaman"
+                description="Catat peminjam, jatuh tempo, unit yang dipinjam, dan catatan transaksi."
+                onClose={() => setCreateOpen(false)}
+            >
+                <Form
+                    {...store.form()}
+                    resetOnSuccess
+                    onSuccess={() => setCreateOpen(false)}
+                    className="grid gap-4"
+                >
+                    <Field label="Tipe peminjam">
+                        <Select name="borrower_type" defaultValue="internal">
+                            <option value="internal">Internal</option>
+                            <option value="external">Eksternal</option>
+                        </Select>
+                    </Field>
+                    <Field label="Peminjam internal">
+                        <Select name="borrower_user_id" defaultValue="">
+                            <option value="">Pilih internal</option>
+                            {internalBorrowers.map((person) => (
+                                <option key={person.id} value={person.id}>
+                                    {person.name}
+                                </option>
+                            ))}
+                        </Select>
+                    </Field>
+                    <Field label="Peminjam eksternal">
+                        <Select name="external_borrower_id" defaultValue="">
+                            <option value="">Pilih eksternal</option>
+                            {externalBorrowers.map((person) => (
+                                <option key={person.id} value={person.id}>
+                                    {person.name}
+                                </option>
+                            ))}
+                        </Select>
+                    </Field>
+                    <Field label="Jatuh tempo">
+                        <Input name="due_at" type="datetime-local" />
+                    </Field>
+                    <Field label="Unit" hint="Bisa pilih banyak">
+                        <Select
+                            name="item_unit_ids[]"
+                            multiple
+                            className="min-h-40"
+                        >
+                            {availableUnits.map((unit) => (
+                                <option key={unit.id} value={unit.id}>
+                                    {unit.asset_code} - {unit.item?.name}
+                                </option>
+                            ))}
+                        </Select>
+                    </Field>
+                    <Field label="Catatan" hint="Opsional">
+                        <Input name="notes" placeholder="Catatan transaksi" />
+                    </Field>
+                    <ModalActions>
+                        <SecondaryButton onClick={() => setCreateOpen(false)}>
+                            Batal
+                        </SecondaryButton>
+                        <SubmitButton>Pinjam Unit</SubmitButton>
+                    </ModalActions>
+                </Form>
+            </Modal>
 
             <div className="grid gap-6">
                 {loans.length === 0 ? (
@@ -191,39 +209,76 @@ export default function Loans({
                                             </p>
                                         </div>
                                         {!item.returned_at ? (
+                                            <SubmitButton
+                                                type="button"
+                                                className="w-full sm:w-auto"
+                                                onClick={() =>
+                                                    setReturnItemId(item.id)
+                                                }
+                                            >
+                                                Kembalikan
+                                            </SubmitButton>
+                                        ) : null}
+                                        <Modal
+                                            open={returnItemId === item.id}
+                                            title="Proses pengembalian"
+                                            description={`${item.item_unit.asset_code} - ${item.item_unit.item?.name}`}
+                                            onClose={() =>
+                                                setReturnItemId(null)
+                                            }
+                                            size="md"
+                                        >
                                             <Form
                                                 {...returnMethod.form({
                                                     loan: loan.id,
                                                     loanItem: item.id,
                                                 })}
-                                                className="grid gap-3 sm:grid-cols-[1fr_1fr_auto]"
+                                                onSuccess={() =>
+                                                    setReturnItemId(null)
+                                                }
+                                                className="grid gap-4"
                                             >
-                                                <Select
-                                                    name="return_condition"
-                                                    defaultValue="normal"
+                                                <Field label="Kondisi kembali">
+                                                    <Select
+                                                        name="return_condition"
+                                                        defaultValue="normal"
+                                                    >
+                                                        <option value="normal">
+                                                            normal
+                                                        </option>
+                                                        <option value="rusak">
+                                                            rusak
+                                                        </option>
+                                                        <option value="hilang">
+                                                            hilang
+                                                        </option>
+                                                    </Select>
+                                                </Field>
+                                                <Field
+                                                    label="Catatan"
+                                                    hint="Opsional"
                                                 >
-                                                    <option value="normal">
-                                                        normal
-                                                    </option>
-                                                    <option value="rusak">
-                                                        rusak
-                                                    </option>
-                                                    <option value="hilang">
-                                                        hilang
-                                                    </option>
-                                                </Select>
-                                                <Input
-                                                    name="return_notes"
-                                                    placeholder="Catatan"
-                                                />
-                                                <SubmitButton
-                                                    type="submit"
-                                                    className="w-full sm:w-auto"
-                                                >
-                                                    Kembalikan
-                                                </SubmitButton>
+                                                    <Input
+                                                        name="return_notes"
+                                                        placeholder="Catatan"
+                                                    />
+                                                </Field>
+                                                <ModalActions>
+                                                    <SecondaryButton
+                                                        onClick={() =>
+                                                            setReturnItemId(
+                                                                null,
+                                                            )
+                                                        }
+                                                    >
+                                                        Batal
+                                                    </SecondaryButton>
+                                                    <SubmitButton>
+                                                        Kembalikan
+                                                    </SubmitButton>
+                                                </ModalActions>
                                             </Form>
-                                        ) : null}
+                                        </Modal>
                                     </div>
                                 ))}
                             </div>

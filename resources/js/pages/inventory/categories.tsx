@@ -1,11 +1,15 @@
 import { Form } from '@inertiajs/react';
+import { useState } from 'react';
 import { AppLayout } from '@/components/app-layout';
 import {
     DangerButton,
     EmptyState,
     Field,
     Input,
+    Modal,
+    ModalActions,
     RowValue,
+    SecondaryButton,
     SectionHeader,
     SubmitButton,
     Surface,
@@ -23,6 +27,8 @@ type Category = {
 };
 
 export default function Categories({ categories }: { categories: Category[] }) {
+    const [createOpen, setCreateOpen] = useState(false);
+
     return (
         <AppLayout title="Kategori Alat">
             <Surface>
@@ -31,27 +37,44 @@ export default function Categories({ categories }: { categories: Category[] }) {
                         eyebrow="Inventory"
                         title="Category library"
                         description="Kelola kategori alat dengan identitas kode yang jelas."
-                    />
-
-                    <Form
-                        {...store.form()}
-                        resetOnSuccess
-                        className="grid gap-4 md:grid-cols-2"
-                    >
-                        <Field label="Nama kategori">
-                            <Input name="name" placeholder="Nama kategori" />
-                        </Field>
-                        <Field label="Kode" hint="Opsional">
-                            <Input name="code" placeholder="Kode kategori" />
-                        </Field>
-                        <div className="flex items-end md:col-span-2">
-                            <SubmitButton className="w-full sm:w-auto">
+                        action={
+                            <SubmitButton
+                                type="button"
+                                onClick={() => setCreateOpen(true)}
+                            >
                                 Tambah Kategori
                             </SubmitButton>
-                        </div>
-                    </Form>
+                        }
+                    />
                 </SurfaceBody>
             </Surface>
+
+            <Modal
+                open={createOpen}
+                title="Tambah kategori"
+                description="Buat kategori inventaris baru dengan nama yang mudah dipindai dan kode opsional."
+                onClose={() => setCreateOpen(false)}
+            >
+                <Form
+                    {...store.form()}
+                    resetOnSuccess
+                    onSuccess={() => setCreateOpen(false)}
+                    className="grid gap-4"
+                >
+                    <Field label="Nama kategori">
+                        <Input name="name" placeholder="Nama kategori" />
+                    </Field>
+                    <Field label="Kode" hint="Opsional">
+                        <Input name="code" placeholder="Kode kategori" />
+                    </Field>
+                    <ModalActions>
+                        <SecondaryButton onClick={() => setCreateOpen(false)}>
+                            Batal
+                        </SecondaryButton>
+                        <SubmitButton>Tambah Kategori</SubmitButton>
+                    </ModalActions>
+                </Form>
+            </Modal>
 
             <TableShell
                 headers={['Nama', 'Kode', 'Jumlah alat', '']}
