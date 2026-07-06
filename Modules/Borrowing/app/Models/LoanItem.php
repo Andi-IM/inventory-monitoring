@@ -9,8 +9,14 @@ use Illuminate\Support\Carbon;
 use Modules\Inventory\Models\ItemUnit;
 
 /**
+ * @property int $id
  * @property int $loan_id
+ * @property int $item_unit_id
  * @property Carbon|null $returned_at
+ * @property string|null $return_condition
+ * @property string|null $return_notes
+ * @property-read Loan $loan
+ * @property-read ItemUnit|null $itemUnit
  */
 #[Fillable(['loan_id', 'item_unit_id', 'returned_at', 'return_condition', 'return_notes'])]
 class LoanItem extends Model

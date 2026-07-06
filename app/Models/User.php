@@ -6,6 +6,7 @@ namespace App\Models;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -23,6 +24,7 @@ use Modules\Access\Models\Group;
  * @property string|null $remember_token
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
+ * @property-read Collection<int, Group> $groups
  */
 #[Fillable(['name', 'email', 'password', 'role'])]
 #[Hidden(['password', 'remember_token'])]
@@ -44,14 +46,6 @@ class User extends Authenticatable
         ];
     }
 
-    /**
-     * @return BelongsToMany<Group, $this>
-     */
-    public function groups(): BelongsToMany
-    {
-        return $this->belongsToMany(Group::class);
-    }
-
     public function isAdmin(): bool
     {
         return $this->role === 'Admin';
@@ -60,5 +54,13 @@ class User extends Authenticatable
     public function isPetugas(): bool
     {
         return $this->role === 'Petugas';
+    }
+
+    /**
+     * @return BelongsToMany<Group, $this>
+     */
+    public function groups(): BelongsToMany
+    {
+        return $this->belongsToMany(Group::class, 'group_user');
     }
 }

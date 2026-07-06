@@ -3,6 +3,8 @@
 namespace Modules\Borrowing\Providers;
 
 use Illuminate\Console\Scheduling\Schedule;
+use Modules\Borrowing\Contracts\BorrowingClientInterface;
+use Modules\Borrowing\Services\BorrowingClientService;
 use Nwidart\Modules\Support\ModuleServiceProvider;
 
 class BorrowingServiceProvider extends ModuleServiceProvider
@@ -43,4 +45,17 @@ class BorrowingServiceProvider extends ModuleServiceProvider
     // {
     //     $schedule->command('inspire')->hourly();
     // }
+
+    /**
+     * Register any application services.
+     */
+    public function register(): void
+    {
+        parent::register();
+
+        $this->app->bind(
+            BorrowingClientInterface::class,
+            BorrowingClientService::class
+        );
+    }
 }

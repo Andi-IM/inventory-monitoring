@@ -4,7 +4,8 @@ namespace Modules\Borrowing\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
-use Modules\Inventory\Models\ItemUnit;
+
+// No ItemUnit import
 
 class StoreLoanRequest extends FormRequest
 {
@@ -27,7 +28,8 @@ class StoreLoanRequest extends FormRequest
             'item_unit_ids' => ['required', 'array', 'min:1'],
             'item_unit_ids.*' => [
                 'integer',
-                Rule::exists('item_units', 'id')->where('status', ItemUnit::StatusAvailable),
+                // Cannot use Rule::exists() easily across modules without DB coupling.
+                // It's verified in the controller using the client.
             ],
         ];
     }
