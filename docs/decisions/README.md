@@ -12,3 +12,4 @@ This directory contains the Architecture Decision Records (ADRs) for the **inven
 | [0004](0004-deploy-via-single-container-monolithic-docker.md) | Deploy via Single Container Monolithic Docker | Accepted | 2026-07-05 |
 | [0005](0005-use-module-client-services-for-cross-module-data-access.md) | Use Module Client Services for Cross-Module Data Access | Accepted | 2026-07-06 |
 | [0006](0006-adopt-tailadmin-design-system-for-frontend-ui.md) | Adopt TailAdmin Design System for Frontend UI | Accepted | 2026-07-06 |
+| [0007](0007-adopt-agent-workflow-guardrails.md) | Adopt Agent Workflow Guardrails | Accepted | 2026-07-07 |
