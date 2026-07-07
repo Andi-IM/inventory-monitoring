@@ -248,11 +248,13 @@ export function FormGrid({
 export function Field({
     label,
     hint,
+    required,
     children,
     className = '',
 }: {
     label: string;
     hint?: string;
+    required?: boolean;
     children: ReactNode;
     className?: string;
 }): ReactNode {
@@ -261,7 +263,10 @@ export function Field({
             className={`grid gap-2 text-sm font-medium text-slate-700 dark:text-slate-200 ${className}`}
         >
             <span className="flex items-center justify-between gap-3">
-                <span>{label}</span>
+                <span>
+                    {label}
+                    {required && <span className="ml-1 text-rose-500">*</span>}
+                </span>
                 {hint ? (
                     <span className="text-xs font-normal text-slate-500 dark:text-slate-400">
                         {hint}
