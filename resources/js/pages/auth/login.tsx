@@ -1,9 +1,7 @@
 import { Form, Head } from '@inertiajs/react';
 import { store } from '@/actions/Modules/Access/Http/Controllers/AuthController';
 import gridShape from '@/assets/tailadmin/shape/grid-01.svg';
-
-const fieldClass =
-    'h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-sm outline-none transition placeholder:text-gray-500 focus:border-indigo-400 focus:ring-3 focus:ring-indigo-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/40 dark:focus:border-indigo-500';
+import { Field, Input, SubmitButton } from '@/components/tailadmin';
 
 export default function Login() {
     return (
@@ -28,23 +26,15 @@ export default function Login() {
                                 {({ errors, processing }) => (
                                     <div className="space-y-5">
                                         <div>
-                                            <label
-                                                htmlFor="email"
-                                                className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400"
-                                            >
-                                                Email
-                                                <span className="text-rose-500">
-                                                    *
-                                                </span>
-                                            </label>
-                                            <input
-                                                id="email"
-                                                name="email"
-                                                type="email"
-                                                autoComplete="email"
-                                                placeholder="admin@example.com"
-                                                className={fieldClass}
-                                            />
+                                            <Field label="Email" hint="Wajib">
+                                                <Input
+                                                    id="email"
+                                                    name="email"
+                                                    type="email"
+                                                    autoComplete="email"
+                                                    placeholder="admin@example.com"
+                                                />
+                                            </Field>
                                             {errors.email ? (
                                                 <p className="mt-1.5 text-sm text-rose-600 dark:text-rose-400">
                                                     {errors.email}
@@ -53,23 +43,15 @@ export default function Login() {
                                         </div>
 
                                         <div>
-                                            <label
-                                                htmlFor="password"
-                                                className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400"
-                                            >
-                                                Kata sandi
-                                                <span className="text-rose-500">
-                                                    *
-                                                </span>
-                                            </label>
-                                            <input
-                                                id="password"
-                                                name="password"
-                                                type="password"
-                                                autoComplete="current-password"
-                                                placeholder="Masukkan kata sandi"
-                                                className={`${fieldClass} pr-11`}
-                                            />
+                                            <Field label="Kata sandi" hint="Wajib">
+                                                <Input
+                                                    id="password"
+                                                    name="password"
+                                                    type="password"
+                                                    autoComplete="current-password"
+                                                    placeholder="Masukkan kata sandi"
+                                                />
+                                            </Field>
                                             {errors.password ? (
                                                 <p className="mt-1.5 text-sm text-rose-600 dark:text-rose-400">
                                                     {errors.password}
@@ -116,15 +98,11 @@ export default function Login() {
                                             </span>
                                         </div>
 
-                                        <button
-                                            type="submit"
-                                            disabled={processing}
-                                            className="flex w-full items-center justify-center rounded-lg bg-indigo-600 px-4 py-3 text-sm font-medium text-white shadow-sm transition hover:bg-indigo-500 focus:ring-3 focus:ring-indigo-500/15 focus:outline-none disabled:cursor-not-allowed disabled:bg-indigo-200 disabled:text-indigo-500 dark:bg-indigo-500 dark:hover:bg-indigo-400 dark:disabled:bg-indigo-950 dark:disabled:text-indigo-500"
-                                        >
+                                        <SubmitButton className="w-full">
                                             {processing
                                                 ? 'Memproses...'
                                                 : 'Masuk'}
-                                        </button>
+                                        </SubmitButton>
                                     </div>
                                 )}
                             </Form>
