@@ -31,6 +31,13 @@
 
 * add CI pipeline for Docker build and smoke testing with postgresql-client support ([48ef0e1](https://github.com/Andi-IM/inventory-monitoring/commit/48ef0e1f3e4821217686af06721a37c79444ef6e))
 
+## [0.8.0](https://github.com/Andi-IM/inventory-monitoring/compare/v0.7.0...v0.8.0) (2026-07-07)
+
+
+### Features
+
+* **tailadmin:** add login shell and compact sidebar ([f80fe88](https://github.com/Andi-IM/inventory-monitoring/commit/f80fe88d23e9a12df43d4dd09ee3de6587c43597))
+
 ## [0.7.0](https://github.com/Andi-IM/inventory-monitoring/compare/v0.6.0...v0.7.0) (2026-07-06)
 
 
