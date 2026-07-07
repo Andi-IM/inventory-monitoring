@@ -26,13 +26,14 @@ export default function Login() {
                                 {({ errors, processing }) => (
                                     <div className="space-y-5">
                                         <div>
-                                            <Field label="Email" hint="Wajib">
+                                            <Field label="Email" hint="Wajib" required>
                                                 <Input
                                                     id="email"
                                                     name="email"
                                                     type="email"
                                                     autoComplete="email"
                                                     placeholder="admin@example.com"
+                                                    required
                                                 />
                                             </Field>
                                             {errors.email ? (
@@ -43,13 +44,14 @@ export default function Login() {
                                         </div>
 
                                         <div>
-                                            <Field label="Kata sandi" hint="Wajib">
+                                            <Field label="Kata sandi" hint="Wajib" required>
                                                 <Input
                                                     id="password"
                                                     name="password"
                                                     type="password"
                                                     autoComplete="current-password"
                                                     placeholder="Masukkan kata sandi"
+                                                    required
                                                 />
                                             </Field>
                                             {errors.password ? (
