@@ -33,20 +33,35 @@ This application is a Laravel application and its main Laravel ecosystems packag
 
 This project has domain-specific skills available in `**/skills/**`. You MUST activate the relevant skill whenever you work in that domain—don't wait until you're stuck.
 
+- For every prompt related to UI, frontend, layout, styling, components, Inertia React pages, Tailwind classes, visual design, responsive behavior, accessibility, or browser-facing UX, always activate the `impeccable` skill/hook before making changes and follow its findings alongside the project ADRs and `DESIGN.md`.
+
 ## Conventions
 
 - You must follow all existing code conventions used in this application. When creating or editing a file, check sibling files for the correct structure, approach, and naming.
 - Use descriptive names for variables and methods. For example, `isRegisteredForDiscounts`, not `discount()`.
 - Check for existing components to reuse before writing a new one.
 
+## Architecture Decision Records
+
+- Before responding to or acting on any prompt, inspect the ADR index at `docs/decisions/README.md` and read any relevant ADR files in `docs/decisions/`.
+- Treat accepted ADRs as binding project constraints. If a user request conflicts with an ADR, call out the conflict before making changes and ask for explicit direction.
+- When implementing architectural, module-boundary, deployment, CI/CD, or frontend design changes, align the work with the relevant ADRs or propose a new ADR only if the user explicitly asks for documentation.
+
 ## Verification Scripts
 
 - Do not create verification scripts or tinker when tests cover that functionality and prove they work. Unit and feature tests are more important.
+- After making changes, always run the relevant PHP lint/format checks, JavaScript lint checks, and TypeScript type checking before finalizing.
+- For PHP changes, run `vendor/bin/pint --dirty --format agent` and any project PHP static/type checks that apply.
+- For JavaScript/React changes, run the project JavaScript lint command when available and `npm run types:check` for TypeScript validation.
+- If a verification command cannot run because of an environment or sandbox issue, report the exact command and blocker in the final response.
 
 ## Application Structure & Architecture
 
 - Stick to existing directory structure; don't create new base folders without approval.
 - Do not change the application's dependencies without approval.
+- When the user asks to start implementation work, create a new Git branch first to keep the workspace scoped and clean for that responsibility.
+- Name branches after the task's responsibility and, when applicable, the relevant ADR/domain/module context (for example, `feature/adr-0006-tailadmin-login`, `fix/access-auth-remember`, or `chore/adr-0002-module-ci`).
+- Before creating a branch, inspect the current branch and working tree. If unrelated uncommitted changes are present, do not overwrite or move them; call out the dirty state and keep the new work scoped.
 
 ## Frontend Bundling
 
