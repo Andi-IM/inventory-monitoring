@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 use Modules\Access\Models\Group;
 
 test('user can login and logout', function (): void {
@@ -18,6 +19,24 @@ test('user can login and logout', function (): void {
 
     $this->post(route('logout'))->assertRedirect(route('login', absolute: false));
     $this->assertGuest();
+});
+
+test('user can login with remember me', function (): void {
+    $user = User::factory()->create([
+        'email' => 'remember@example.com',
+        'password' => 'password',
+    ]);
+
+    $response = $this->post(route('login.store'), [
+        'email' => 'remember@example.com',
+        'password' => 'password',
+        'remember' => true,
+    ]);
+
+    $response->assertRedirect(route('dashboard', absolute: false));
+
+    $this->assertAuthenticatedAs($user);
+    $response->assertCookie(Auth::guard()->getRecallerName());
 });
 
 test('only admin can manage access data', function (): void {
