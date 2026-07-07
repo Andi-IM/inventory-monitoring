@@ -19,7 +19,9 @@ class AuthController extends Controller
 
     public function store(LoginRequest $request): RedirectResponse
     {
-        if (! Auth::attempt($request->validated())) {
+        $credentials = $request->safe()->only(['email', 'password']);
+
+        if (! Auth::attempt($credentials, $request->boolean('remember'))) {
             return back()->withErrors([
                 'email' => 'Email atau kata sandi tidak valid.',
             ])->onlyInput('email');

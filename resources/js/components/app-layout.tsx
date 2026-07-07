@@ -1,4 +1,16 @@
 import { Form, Head, Link, usePage } from '@inertiajs/react';
+import {
+    BookOpen,
+    LayoutDashboard,
+    LogOut,
+    Menu,
+    Package,
+    Ruler,
+    Shield,
+    Tags,
+    UserCheck,
+    Users,
+} from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { dashboard, logout } from '@/routes';
 import { index as externalBorrowersIndex } from '@/routes/access/external-borrowers';
@@ -17,6 +29,7 @@ type AppLayoutProps = {
 type NavItem = {
     label: string;
     href: string;
+    icon: React.ElementType;
 };
 
 type NavGroup = {
@@ -27,27 +40,37 @@ type NavGroup = {
 const navigation: NavGroup[] = [
     {
         heading: 'MENU',
-        items: [{ label: 'Dashboard', href: dashboard().url }],
+        items: [
+            {
+                label: 'Dashboard',
+                href: dashboard().url,
+                icon: LayoutDashboard,
+            },
+        ],
     },
     {
         heading: 'ACCESS',
         items: [
-            { label: 'Users', href: usersIndex().url },
-            { label: 'Groups', href: groupsIndex().url },
-            { label: 'External Borrowers', href: externalBorrowersIndex().url },
+            { label: 'Users', href: usersIndex().url, icon: Users },
+            { label: 'Groups', href: groupsIndex().url, icon: Shield },
+            {
+                label: 'External Borrowers',
+                href: externalBorrowersIndex().url,
+                icon: UserCheck,
+            },
         ],
     },
     {
         heading: 'INVENTORY',
         items: [
-            { label: 'Categories', href: categoriesIndex().url },
-            { label: 'Items', href: itemsIndex().url },
-            { label: 'Units', href: unitsIndex().url },
+            { label: 'Categories', href: categoriesIndex().url, icon: Tags },
+            { label: 'Items', href: itemsIndex().url, icon: Package },
+            { label: 'Units', href: unitsIndex().url, icon: Ruler },
         ],
     },
     {
         heading: 'BORROWING',
-        items: [{ label: 'Loans', href: loansIndex().url }],
+        items: [{ label: 'Loans', href: loansIndex().url, icon: BookOpen }],
     },
 ];
 
@@ -81,6 +104,7 @@ function getInitialTheme(): 'light' | 'dark' {
 
 export function AppLayout({ title, children }: AppLayoutProps) {
     const [sidebarOpen, setSidebarOpen] = useState(false);
+    const [sidebarMinimized, setSidebarMinimized] = useState(false);
     const [theme, setTheme] = useState<'light' | 'dark'>(getInitialTheme);
     const page = usePage();
     const currentPath = page.url.split('?')[0];
@@ -119,35 +143,45 @@ export function AppLayout({ title, children }: AppLayoutProps) {
                 />
 
                 <aside
-                    className={`fixed inset-y-0 left-0 z-50 flex w-[280px] flex-col border-r border-slate-200 bg-white transition-transform duration-300 lg:static lg:translate-x-0 dark:border-white/10 dark:bg-slate-950 ${
+                    className={`fixed inset-y-0 left-0 z-50 flex flex-col border-r border-slate-200 bg-white transition-all duration-300 lg:static lg:translate-x-0 dark:border-white/10 dark:bg-slate-950 ${
                         sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-                    }`}
+                    } ${sidebarMinimized ? 'w-[80px]' : 'w-[280px]'}`}
                 >
-                    <div className="flex items-center gap-3 px-6 py-6">
-                        <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-indigo-500 text-white shadow-sm shadow-indigo-500/20">
+                    <div
+                        className={`flex h-[92px] items-center gap-3 py-6 ${sidebarMinimized ? 'justify-center px-0' : 'justify-start px-6'}`}
+                    >
+                        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-indigo-500 text-white shadow-sm shadow-indigo-500/20">
                             <span className="text-sm font-black tracking-[0.2em]">
                                 HE
                             </span>
                         </div>
-                        <div>
-                            <p className="text-2xl font-semibold text-slate-950 dark:text-white">
-                                HERTS
-                            </p>
-                            <p className="text-xs tracking-[0.35em] text-slate-400 uppercase dark:text-slate-500">
-                                Inventory Monitor
-                            </p>
-                        </div>
+                        {!sidebarMinimized && (
+                            <div className="truncate">
+                                <p className="text-2xl font-semibold text-slate-950 dark:text-white">
+                                    HERTS
+                                </p>
+                                <p className="truncate text-xs tracking-[0.35em] text-slate-400 uppercase dark:text-slate-500">
+                                    Inventory Monitor
+                                </p>
+                            </div>
+                        )}
                     </div>
 
                     <div className="flex-1 overflow-y-auto px-4 pb-6">
                         {navigation.map((group) => (
                             <div key={group.heading} className="mt-2">
-                                <h3 className="mb-3 px-3 text-xs font-semibold tracking-[0.25em] text-slate-400 uppercase dark:text-slate-500">
-                                    {group.heading}
-                                </h3>
+                                {!sidebarMinimized && (
+                                    <h3 className="mb-3 truncate px-3 text-xs font-semibold tracking-[0.25em] text-slate-400 uppercase dark:text-slate-500">
+                                        {group.heading}
+                                    </h3>
+                                )}
+                                {sidebarMinimized && (
+                                    <div className="mb-3 w-full border-t border-slate-200 px-3 dark:border-white/10" />
+                                )}
                                 <div className="space-y-1">
                                     {group.items.map((item) => {
                                         const active = isActive(item.href);
+                                        const Icon = item.icon;
 
                                         return (
                                             <Link
@@ -157,25 +191,37 @@ export function AppLayout({ title, children }: AppLayoutProps) {
                                                 onClick={() =>
                                                     setSidebarOpen(false)
                                                 }
+                                                title={
+                                                    sidebarMinimized
+                                                        ? item.label
+                                                        : undefined
+                                                }
                                                 aria-current={
                                                     active ? 'page' : undefined
                                                 }
-                                                className={`group flex items-center justify-between rounded-2xl px-3 py-3.5 text-sm transition ${
+                                                className={`group flex items-center ${sidebarMinimized ? 'justify-center' : 'justify-start gap-3'} rounded-2xl px-3 py-3.5 text-sm transition ${
                                                     active
                                                         ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-500/15 dark:text-indigo-200'
                                                         : 'text-slate-600 hover:bg-slate-100 hover:text-slate-950 dark:text-slate-300 dark:hover:bg-white/5 dark:hover:text-white'
                                                 }`}
                                             >
-                                                <span className="font-medium">
-                                                    {item.label}
-                                                </span>
-                                                <span
-                                                    className={`h-2.5 w-2.5 rounded-full ${
-                                                        active
-                                                            ? 'bg-indigo-500 dark:bg-indigo-300'
-                                                            : 'bg-slate-300 group-hover:bg-slate-400 dark:bg-slate-600 dark:group-hover:bg-slate-500'
-                                                    }`}
+                                                <Icon
+                                                    className={`shrink-0 ${sidebarMinimized ? 'h-6 w-6' : 'h-5 w-5'} ${active ? 'text-indigo-600 dark:text-indigo-300' : 'text-slate-400 group-hover:text-slate-600 dark:text-slate-400 dark:group-hover:text-slate-300'}`}
                                                 />
+                                                {!sidebarMinimized && (
+                                                    <span className="truncate font-medium">
+                                                        {item.label}
+                                                    </span>
+                                                )}
+                                                {!sidebarMinimized && (
+                                                    <span
+                                                        className={`ml-auto h-2.5 w-2.5 shrink-0 rounded-full ${
+                                                            active
+                                                                ? 'bg-indigo-500 dark:bg-indigo-300'
+                                                                : 'bg-slate-300 group-hover:bg-slate-400 dark:bg-slate-600 dark:group-hover:bg-slate-500'
+                                                        }`}
+                                                    />
+                                                )}
                                             </Link>
                                         );
                                     })}
@@ -188,8 +234,15 @@ export function AppLayout({ title, children }: AppLayoutProps) {
                         {...logout.form()}
                         className="border-t border-slate-200 p-4 dark:border-white/10"
                     >
-                        <button className="flex w-full items-center justify-center rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 dark:border-white/10 dark:bg-white/5 dark:text-slate-200 dark:hover:bg-white/10">
-                            Logout
+                        <button
+                            className="flex w-full items-center justify-center rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 dark:border-white/10 dark:bg-white/5 dark:text-slate-200 dark:hover:bg-white/10"
+                            title={sidebarMinimized ? 'Logout' : undefined}
+                        >
+                            {sidebarMinimized ? (
+                                <LogOut className="h-5 w-5" />
+                            ) : (
+                                'Logout'
+                            )}
                         </button>
                     </Form>
                 </aside>
@@ -204,11 +257,18 @@ export function AppLayout({ title, children }: AppLayoutProps) {
                                     onClick={() => setSidebarOpen(true)}
                                     aria-label="Open sidebar"
                                 >
-                                    <span className="space-y-1.5">
-                                        <span className="block h-0.5 w-4 rounded-full bg-current" />
-                                        <span className="block h-0.5 w-4 rounded-full bg-current" />
-                                        <span className="block h-0.5 w-4 rounded-full bg-current" />
-                                    </span>
+                                    <Menu className="h-5 w-5" />
+                                </button>
+
+                                <button
+                                    type="button"
+                                    className="hidden h-11 w-11 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-600 transition hover:bg-slate-100 lg:inline-flex dark:border-white/10 dark:bg-white/5 dark:text-slate-300 dark:hover:bg-white/10"
+                                    onClick={() =>
+                                        setSidebarMinimized(!sidebarMinimized)
+                                    }
+                                    aria-label="Toggle sidebar"
+                                >
+                                    <Menu className="h-5 w-5" />
                                 </button>
 
                                 <div className="hidden items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-400 shadow-sm lg:flex dark:border-white/10 dark:bg-white/5 dark:text-slate-500">
